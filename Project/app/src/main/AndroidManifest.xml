@@ -3,6 +3,7 @@
     package="com.peterarkt.customerconnect">
 
     <application
+        android:name=".CustomerConnectApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -16,6 +17,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+
+        <provider
+            android:name=".database.provider.CustomerConnectProvider"
+            android:authorities="@string/content_authority"
+            android:exported="true"
+            />
+
     </application>
 
 </manifest>
