@@ -7,5 +7,27 @@
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
     </style>
+    
+    <style name="CustomerConnect.Text.ListItem" parent="TextAppearance.AppCompat">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/blackPrimaryText</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="CustomerConnect.Text.ListItem.Primary">
+        <item name="android:maxLines">1</item>
+        <item name="android:ellipsize">end</item>
+    </style>
+
+    <style name="CustomerConnect.Text.ListItem.Secondary">
+        <item name="android:textColor">@color/blackSecondaryText</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:ellipsize">end</item>
+    </style>
+
+    <style name="CustomerConnect.Text.ListItem.Secondary.Multiline">
+        <item name="android:maxLines">3</item>
+    </style>
 
 </resources>
