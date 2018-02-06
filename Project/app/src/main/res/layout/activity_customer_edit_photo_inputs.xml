@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.peterarkt.customerconnect.ui.customerEdit.CustomerEditActivity"
+    >
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingTop="8dp"
+            android:orientation="horizontal"
+            android:gravity="top">
+
+
+            <!-- First Input with icon -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="8dp">
+
+                <ImageView
+                    style="@style/CustomerConnect.Form.SectionImage"
+                    android:src="@drawable/ic_material_camera_gray"
+                    android:layout_gravity="top"
+                    />
+
+                <!-- Name input area -->
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#555">
+
+                    <ImageView
+                        android:id="@+id/input_customer_photo_view"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+
+                    <LinearLayout
+                        android:id="@+id/add_or_attach_photo_container"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_gravity="center"
+                        android:gravity="center"
+                        android:padding="32dp">
+
+                        <Button
+                            android:id="@+id/action_attach_photo"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/attach_photo"
+                            style="@style/CustomerConnect.Button.Colored"
+                            android:drawableLeft="@drawable/ic_material_attach_white"
+                            android:drawablePadding="6dp"
+                            />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/or"
+                            android:textColor="@color/white"/>
+
+                        <Button
+                            android:id="@+id/action_take_photo"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            style="@style/CustomerConnect.Button.Colored"
+                            android:text="@string/take_photo"
+                            android:drawableLeft="@drawable/ic_material_take_photo_white"
+                            android:drawablePadding="6dp"
+                            />
+
+                    </LinearLayout>
+
+                </FrameLayout>
+
+            </LinearLayout>
+
+
+        </LinearLayout>
+</layout>

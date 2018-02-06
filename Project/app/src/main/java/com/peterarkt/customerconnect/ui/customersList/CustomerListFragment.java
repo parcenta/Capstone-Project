@@ -2,6 +2,7 @@ package com.peterarkt.customerconnect.ui.customersList;
 
 
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
@@ -19,6 +20,7 @@ import com.jakewharton.rxbinding.widget.RxTextView;
 import com.peterarkt.customerconnect.R;
 import com.peterarkt.customerconnect.database.contracts.CustomerContract;
 import com.peterarkt.customerconnect.databinding.FragmentCustomerListBinding;
+import com.peterarkt.customerconnect.ui.customerEdit.CustomerEditActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -85,6 +87,13 @@ public class CustomerListFragment extends Fragment implements LoaderManager.Load
                         searchCustomer(charSequence.toString());
                     }
                 });
+
+        mBinding.actionNewCustomer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(getActivity(), CustomerEditActivity.class));
+            }
+        });
 
         return mBinding.getRoot();
     }

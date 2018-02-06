@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Style Based on: https://material.io/guidelines/components/text-fields.html#text-fields-layout-->
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.peterarkt.customerconnect.ui.customerEdit.CustomerEditActivity">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <!-- Basic Info (Name) -->
+                    <include
+                        android:id="@+id/basic_info_layout"
+                        layout="@layout/activity_customer_edit_basic_info_inputs"/>
+
+
+                    <!-- Phone Info -->
+                    <include
+                        android:id="@+id/phone_layout"
+                        layout="@layout/activity_customer_edit_phone_inputs"/>
+
+
+                    <!-- Email Info -->
+                    <include
+                        android:id="@+id/email_layout"
+                        layout="@layout/activity_customer_edit_email_inputs"/>
+
+
+                    <!-- Location Info -->
+                    <include
+                        android:id="@+id/location_layout"
+                        layout="@layout/activity_customer_edit_location_inputs"/>
+
+
+                    <!-- Photo Info -->
+                    <include
+                        android:id="@+id/photo_layout"
+                        layout="@layout/activity_customer_edit_photo_inputs"/>
+
+
+
+                </LinearLayout>
+            </ScrollView>
+
+
+            <!-- Save FAB -->
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/action_new_customer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|end"
+                android:layout_margin="@dimen/fab_margin"
+                android:src="@drawable/ic_material_ok_white"
+                android:contentDescription="@string/add_new_customer"
+
+                app:fabSize="normal"
+                app:elevation="@dimen/fab_resting_elevation"
+                app:pressedTranslationZ="@dimen/fab_pressed_elevation"/>
+
+    </FrameLayout>
+
+</layout>

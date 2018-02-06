@@ -14,9 +14,15 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+
+            // Source: https://stackoverflow.com/questions/26124309/manage-google-maps-api-key-with-gradle-in-android-studio
+            resValue "string", "google_maps_api_key", "[RELEASE_GOOGLE_API_KEY]"
         }
         debug {
             debuggable true
+
+            // Source: https://stackoverflow.com/questions/26124309/manage-google-maps-api-key-with-gradle-in-android-studio
+            resValue "string", "google_maps_api_key", "[DEBUG_GOOGLE_API_KEY]"
         }
     }
 

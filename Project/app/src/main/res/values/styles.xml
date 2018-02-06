@@ -30,4 +30,22 @@
         <item name="android:maxLines">3</item>
     </style>
 
+    <style name="CustomerConnect.Form.SectionImage" parent="AppTheme">
+        <item name="android:layout_width">24dp</item>
+        <item name="android:layout_height">24dp</item>
+        <item name="android:layout_marginEnd">16dp</item>
+    </style>
+
+    <!-- Button -->
+    <style name="CustomerConnect.Button.Colored" parent="Base.Widget.AppCompat.Button.Colored">
+        <item name="colorButtonNormal">@color/blue_button_material</item>
+        <item name="backgroundTint">@color/blue_button_material</item>
+        <item name="android:textColorPrimary">@color/white</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:radius">2dp</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:paddingLeft">16dp</item>
+        <item name="android:paddingRight">16dp</item>
+    </style>
+
 </resources>

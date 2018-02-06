@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.peterarkt.customerconnect.ui.customerEdit.CustomerEditActivity">
+    <!-- Location Info Area -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="8dp"
+        android:orientation="vertical"
+        android:gravity="center_vertical">
+
+
+        <!-- First Input with icon -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="8dp">
+
+            <ImageView
+                style="@style/CustomerConnect.Form.SectionImage"
+                android:src="@drawable/ic_material_location_gray"
+                />
+
+            <!-- Name input area -->
+            <android.support.design.widget.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <EditText
+                    android:id="@+id/input_customer_address_street"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/form_customer_address_street_placeholder"/>
+
+            </android.support.design.widget.TextInputLayout>
+
+        </LinearLayout>
+
+        <!-- Country and City Inputs. -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="8dp"
+            android:orientation="horizontal">
+
+            <View
+                style="@style/CustomerConnect.Form.SectionImage"
+                />
+
+            <!-- Address City -->
+            <android.support.design.widget.TextInputLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.4">
+
+                <EditText
+                    android:id="@+id/input_customer_address_country"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/form_customer_address_street_country_placeholder"
+                    />
+
+            </android.support.design.widget.TextInputLayout>
+
+            <!-- Address Country -->
+            <android.support.design.widget.TextInputLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.6">
+
+                <EditText
+                    android:id="@+id/input_customer_address_city"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/form_customer_address_street_city_placeholder"/>
+
+            </android.support.design.widget.TextInputLayout>
+
+
+            <ImageButton
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:src="@drawable/ic_material_my_location_gray"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <View
+                style="@style/CustomerConnect.Form.SectionImage"
+                />
+
+            <fragment
+                android:id="@+id/map_fragment"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                class="com.google.android.gms.maps.SupportMapFragment" />
+
+
+        </LinearLayout>
+
+
+    </LinearLayout>
+</layout>

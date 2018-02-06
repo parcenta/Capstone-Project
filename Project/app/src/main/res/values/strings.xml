@@ -10,6 +10,18 @@
 
     <string name="an_error_has_ocurred">An error has ocurred. Please try again.</string>
 
+
+    <!-- Edit/Create Customer Form -->
+    <string name="form_customer_name_placeholder">Name</string>
+    <string name="form_customer_phone_number_placeholder">Phone number</string>
+    <string name="form_customer_email_placeholder">Email</string>
+    <string name="form_customer_address_street_placeholder">Address street and/or office number</string>
+    <string name="form_customer_address_street_country_placeholder">Country</string>
+    <string name="form_customer_address_street_city_placeholder">City</string>
+    <string name="attach_photo">Attach</string>
+    <string name="take_photo">Take</string>
+    <string name="or">or</string>
+
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
