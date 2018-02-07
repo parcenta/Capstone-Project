@@ -17,8 +17,9 @@
                 android:id="@+id/item_customer_image"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
+                android:src="@drawable/ic_material_person_gray"
+                app:civ_fill_color="@color/common_google_signin_btn_text_dark"
                 app:civ_circle_background_color="@color/common_google_signin_btn_text_dark"
-                tools:src="@drawable/googleg_disabled_color_18"
                 />
         </LinearLayout>
 

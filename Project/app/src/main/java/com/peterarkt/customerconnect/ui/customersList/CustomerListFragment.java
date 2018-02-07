@@ -76,18 +76,6 @@ public class CustomerListFragment extends Fragment implements LoaderManager.Load
         if(savedInstanceState!=null && savedInstanceState.containsKey(TEXT_TO_SEARCH))
             mTextToSearch = savedInstanceState.getString(TEXT_TO_SEARCH);
 
-        // Set the Text Change listener.
-        RxTextView.textChanges(mBinding.searchText)
-                .debounce(500, TimeUnit.MILLISECONDS)
-                .subscribeOn(AndroidSchedulers.mainThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<CharSequence>() {
-                    @Override
-                    public void call(CharSequence charSequence) {
-                        searchCustomer(charSequence.toString());
-                    }
-                });
-
         mBinding.actionNewCustomer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -112,9 +100,26 @@ public class CustomerListFragment extends Fragment implements LoaderManager.Load
         getLoaderManager().restartLoader(LOADER_CUSTOMER_SEARCH_ID, searchBundle,this);
     }
 
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        // Set the Text Change listener.
+        RxTextView.textChanges(mBinding.searchText)
+                .debounce(500, TimeUnit.MILLISECONDS)
+                .subscribeOn(AndroidSchedulers.mainThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<CharSequence>() {
+                    @Override
+                    public void call(CharSequence charSequence) {
+                        searchCustomer(charSequence.toString());
+                    }
+                });
+    }
+
     /* ------------------------------------------------------------------------------------------------
-         *  Loader Methods.
-           ------------------------------------------------------------------------------------------------*/
+     *  Loader Methods.
+       ------------------------------------------------------------------------------------------------*/
     @Override
     public Loader<List<CustomerItem>> onCreateLoader(int id, Bundle args) {
         return new CustomerListAsyncTaskLoader(getActivity(),args);
@@ -125,6 +130,8 @@ public class CustomerListFragment extends Fragment implements LoaderManager.Load
 
         // Set the cursor.
         mItemList = itemList;
+
+        mAdapter.setItemList(mItemList);
 
         // If there are results, then show the list...
         if(mItemList!=null && mItemList.size() > 0){
@@ -139,6 +146,7 @@ public class CustomerListFragment extends Fragment implements LoaderManager.Load
     @Override
     public void onLoaderReset(Loader<List<CustomerItem>> loader) {
         mItemList = null;
+        mAdapter.setItemList(null);
     }
 
 
@@ -180,21 +188,35 @@ public class CustomerListFragment extends Fragment implements LoaderManager.Load
 
             List<CustomerItem> itemList = new ArrayList<>();
 
+            // Context null check.
             Context context = getContext();
             if (context == null) {
                 Timber.d("An error ocurred. Context is null...");
                 return itemList;
             }
 
+            // If there is a text to be searched, then must be added to the query...
             String textToSearch = "";
-            if(mArgs != null && mArgs.containsKey(TEXT_TO_SEARCH)) textToSearch = mArgs.getString(TEXT_TO_SEARCH);
+            String selection = null;
+            String[] selectionArgs = null;
+            if(mArgs != null && mArgs.containsKey(TEXT_TO_SEARCH)) {
+
+                // Extract the text to search from the bundle.
+                textToSearch = mArgs.getString(TEXT_TO_SEARCH,"");
+
+                // If there is some text to be searched, then add to the filter (selection and selectionArgs)...
+                if(!textToSearch.trim().isEmpty()){
+                    selection = CustomerContract.CustomerEntry.COLUMN_CUSTOMER_NAME + " LIKE ?";
+                    selectionArgs = new String[]{"%" + textToSearch + "%"};
+                }
+            }
 
             // Search for the Customers.
             Timber.d("Searching customer with '"+textToSearch+"'...");
             Cursor cursor = context.getContentResolver().query(CustomerContract.CustomerEntry.CONTENT_URI,
                                                                 null,
-                                                                CustomerContract.CustomerEntry.COLUMN_CUSTOMER_NAME + " LIKE ? ",
-                                                                new String[]{textToSearch},
+                                                                selection,
+                                                                selectionArgs,
                                                                 CustomerContract.CustomerEntry.COLUMN_CUSTOMER_NAME);
 
             if(cursor!=null){

@@ -10,6 +10,14 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+            <!-- Source: https://stackoverflow.com/questions/1555109/stop-edittext-from-gaining-focus-at-activity-startup -->
+            <!-- Dummy item to prevent first input from receiving focus -->
+            <LinearLayout
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:layout_width="0px"
+                android:layout_height="0px"/>
+
 
             <ScrollView
                 android:layout_width="match_parent"
@@ -57,7 +65,7 @@
 
             <!-- Save FAB -->
             <android.support.design.widget.FloatingActionButton
-                android:id="@+id/action_new_customer"
+                android:id="@+id/action_save_customer"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom|end"

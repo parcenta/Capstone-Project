@@ -11,6 +11,7 @@ import android.widget.Toast;
 import com.peterarkt.customerconnect.R;
 import com.peterarkt.customerconnect.databinding.ListItemCustomerBinding;
 import com.squareup.picasso.Picasso;
+import com.squareup.picasso.RequestCreator;
 
 import java.util.List;
 
@@ -56,10 +57,14 @@ public class CustomerListAdapter extends RecyclerView.Adapter<CustomerListAdapte
         holder.mBinding.itemCustomerAddress.setText(item.customerAddressStreet);
 
         // Loading image in CircleImageView
-        Picasso.with(mContext)
-                .load(item.customerPhotoUrl)
-                .into(holder.mBinding.itemCustomerImage);
+        if(item.customerPhotoUrl.trim().length() > 0){
+            Picasso.with(mContext)
+                    .load(item.customerPhotoUrl)
+                    .error(R.drawable.ic_material_person_gray)
+                    .into(holder.mBinding.itemCustomerImage);
+        }
     }
+
 
     @Override
     public int getItemCount() {

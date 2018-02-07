@@ -7,6 +7,14 @@
         android:layout_height="match_parent"
         >
 
+        <!-- Source: https://stackoverflow.com/questions/1555109/stop-edittext-from-gaining-focus-at-activity-startup -->
+        <!-- Dummy item to prevent first input from receiving focus -->
+        <LinearLayout
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:layout_width="0px"
+            android:layout_height="0px"/>
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"

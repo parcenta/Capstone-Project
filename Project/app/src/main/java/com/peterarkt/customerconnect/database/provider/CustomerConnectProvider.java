@@ -1,9 +1,12 @@
 package com.peterarkt.customerconnect.database.provider;
 
 import android.content.ContentProvider;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
+import android.database.SQLException;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -101,8 +104,33 @@ public class CustomerConnectProvider extends ContentProvider {
 
     @Nullable
     @Override
-    public Uri insert(@NonNull Uri uri, @Nullable ContentValues contentValues) {
-        return null;
+    public Uri insert(@NonNull Uri uri, @Nullable ContentValues values) {
+        final SQLiteDatabase mDb = mDbHelper.getWritableDatabase();
+        int match = sUriMatcher.match(uri);
+
+        Uri returnUri = null;
+        long id;
+
+        switch (match){
+            case CODE_CUSTOMER:
+                id = mDb.insert(CUSTOMER_TABLE_NAME,null,values);
+                if (id > 0)
+                    returnUri = ContentUris.withAppendedId(CustomerContract.CustomerEntry.CONTENT_URI,id);
+                else
+                    throw new SQLException("Failed to insert row " + uri);
+                break;
+            case CODE_VISIT:
+                id = mDb.insert(VISIT_TABLE_NAME,null,values);
+                if (id > 0)
+                    returnUri = ContentUris.withAppendedId(VisitContract.VisitEntry.CONTENT_URI,id);
+                else
+                    throw new SQLException("Failed to insert row " + uri);
+                break;
+        }
+
+        getContext().getContentResolver().notifyChange(uri,null);
+
+        return returnUri;
     }
 
     @Override
