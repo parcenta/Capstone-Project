@@ -26,9 +26,10 @@ public class CustomerListAdapter extends RecyclerView.Adapter<CustomerListAdapte
     private CustomerOnClickHandler mHandler;
 
 
-    public CustomerListAdapter(Context context, List<CustomerItem> itemList){
+    public CustomerListAdapter(Context context, List<CustomerItem> itemList, CustomerOnClickHandler handler){
         this.mContext   = context;
         this.mItemList  = itemList;
+        this.mHandler   = handler;
     }
 
     public void setItemList(List<CustomerItem> itemList){

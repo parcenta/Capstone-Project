@@ -20,6 +20,7 @@ import com.jakewharton.rxbinding.widget.RxTextView;
 import com.peterarkt.customerconnect.R;
 import com.peterarkt.customerconnect.database.contracts.CustomerContract;
 import com.peterarkt.customerconnect.databinding.FragmentCustomerListBinding;
+import com.peterarkt.customerconnect.ui.CustomerConnectMainActivityHandler;
 import com.peterarkt.customerconnect.ui.customerEdit.CustomerEditActivity;
 
 import java.util.ArrayList;
@@ -43,6 +44,9 @@ public class CustomerListFragment extends Fragment implements LoaderManager.Load
 
     FragmentCustomerListBinding mBinding;
 
+    // Handler to comunicate to the parent activity.
+    CustomerConnectMainActivityHandler mActivityHandler;
+
     // For the Customer list´ RecyclerView
     List<CustomerItem> mItemList;
     CustomerListAdapter mAdapter;
@@ -53,12 +57,6 @@ public class CustomerListFragment extends Fragment implements LoaderManager.Load
     }
 
 
-    // Fragment "newInstance" method.
-    public static CustomerListFragment newInstance(){
-        CustomerListFragment fragment = new CustomerListFragment();
-        return fragment;
-    }
-
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -66,7 +64,7 @@ public class CustomerListFragment extends Fragment implements LoaderManager.Load
 
 
         // Set Adapter
-        mAdapter = new CustomerListAdapter(getActivity(),null);
+        mAdapter = new CustomerListAdapter(getActivity(),null, this);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
         mBinding.customerListRecyclerView.setLayoutManager(layoutManager);
         mBinding.customerListRecyclerView.setAdapter(mAdapter);
@@ -90,6 +88,21 @@ public class CustomerListFragment extends Fragment implements LoaderManager.Load
     public void onResume() {
         super.onResume();
         searchCustomer(mTextToSearch);
+    }
+
+    // Override onAttach to make sure that the container activity has implemented the callback
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+
+        // This makes sure that the host activity has implemented the callback interface
+        // If not, it throws an exception
+        try {
+            mActivityHandler         = (CustomerConnectMainActivityHandler) context;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(context.toString()
+                    + " must implement RecipeDetailFragmentStepAdapter.OnRecipeStepClickHandler AND RecipeDetailHandler");
+        }
     }
 
     private void searchCustomer(String textToSearch){
@@ -156,7 +169,7 @@ public class CustomerListFragment extends Fragment implements LoaderManager.Load
        ------------------------------------------------------------------------------------------------*/
     @Override
     public void onCustomerClick(int customerId) {
-
+        if(mActivityHandler!=null) mActivityHandler.showCustomerSelected(customerId);
     }
 
 

@@ -9,8 +9,9 @@ import com.peterarkt.customerconnect.R;
 import com.peterarkt.customerconnect.database.contracts.CustomerContract;
 import com.peterarkt.customerconnect.database.contracts.VisitContract;
 import com.peterarkt.customerconnect.databinding.ActivityCustomerConnectMainBinding;
+import com.peterarkt.customerconnect.ui.customerDetail.CustomerDetailActivity;
 
-public class CustomerConnectMainActivity extends AppCompatActivity {
+public class CustomerConnectMainActivity extends AppCompatActivity implements CustomerConnectMainActivityHandler{
 
     ActivityCustomerConnectMainBinding mBinding;
 
@@ -22,5 +23,10 @@ public class CustomerConnectMainActivity extends AppCompatActivity {
 
 
 
+    }
+
+    @Override
+    public void showCustomerSelected(int customerId) {
+        CustomerDetailActivity.launch(this,customerId);
     }
 }

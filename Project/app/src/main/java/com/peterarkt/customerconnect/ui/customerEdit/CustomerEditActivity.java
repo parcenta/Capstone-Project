@@ -163,6 +163,9 @@ public class CustomerEditActivity extends AppCompatActivity  implements OnMapRea
 
         @Override
         public void onLoadFinished(Loader<String> loader, String errorMessage) {
+            // Turn off flag.
+            customerIsSaving = false;
+
 
             // if everything is fine...
             if(errorMessage != null && errorMessage.isEmpty()){
