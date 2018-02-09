@@ -144,6 +144,7 @@ public class CustomerEditActivity extends AppCompatActivity  implements OnMapRea
                     viewModel.customerId                  = 0; // If the CustomerId is zero, internally will create an ID in INS mode.
                     viewModel.customerName                = mBinding.basicInfoLayout.inputCustomerName.getText().toString().trim();
                     viewModel.customerPhoneNumber         = mBinding.phoneLayout.inputCustomerPhoneNumber.getText().toString().trim();
+                    viewModel.customerEmail               = mBinding.emailLayout.inputCustomerEmail.getText().toString().trim();
                     viewModel.customerPhoneType           = String.valueOf(mBinding.phoneLayout.inputCustomerPhoneTypeSpinner.getSelectedItemId());
                     viewModel.customerAddressStreet       = mBinding.locationLayout.inputCustomerAddressStreet.getText().toString();
                     viewModel.customerAddressCity         = mBinding.locationLayout.inputCustomerAddressCity.getText().toString();

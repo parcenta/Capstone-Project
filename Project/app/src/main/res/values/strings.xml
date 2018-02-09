@@ -27,6 +27,11 @@
     <string name="customer_address_street_is_required">Address Street is required.</string>
 
 
+    <string name="navigate">Navigate</string>
+    <string name="send_email">Send email</string>
+    <string name="call">Call</string>
+
+
     <string-array name="phone_types_array">
         <item>Home</item>
         <item>Work</item>

@@ -5,6 +5,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 
 import com.peterarkt.customerconnect.ui.customerDetail.customerDetailHeader.CustomerDetailHeaderFragment;
+import com.peterarkt.customerconnect.ui.customerDetail.customerDetailInfo.CustomerDetailInfoFragment;
 
 /**
  * Created by Andrés on 2/8/18.
@@ -32,7 +33,7 @@ public class CustomerDetailPagerAdapter extends FragmentStatePagerAdapter{
     public Fragment getItem(int position) {
         switch (position) {
             case 0: // Fragment # 0 - This will show FirstFragment
-                return CustomerDetailHeaderFragment.newInstance(mCustomerId);
+                return CustomerDetailInfoFragment.newInstance(mCustomerId);
             case 1: // Fragment # 0 - This will show FirstFragment different title
                 return CustomerDetailHeaderFragment.newInstance(mCustomerId);
             default:

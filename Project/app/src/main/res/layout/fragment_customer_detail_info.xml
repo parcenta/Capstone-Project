@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.peterarkt.customerconnect.ui.customerDetail.customerDetailInfo.CustomerDetailInfoFragment">
+
+
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+
+            <!-- Phone Info -->
+            <include
+                android:id="@+id/phone_layout"
+                layout="@layout/fragment_customer_detail_info_phone_layout"/>
+
+            <!-- Email Info -->
+            <include
+                android:id="@+id/email_layout"
+                layout="@layout/fragment_customer_detail_info_email_layout"/>
+
+            <!-- Location Info -->
+            <include
+                android:id="@+id/location_layout"
+                layout="@layout/fragment_customer_detail_info_location_layout"/>
+
+
+        </LinearLayout>
+
+    </ScrollView>
+
+
+</layout>

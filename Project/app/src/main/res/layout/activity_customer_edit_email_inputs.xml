@@ -31,9 +31,10 @@
                 android:layout_height="wrap_content">
 
                 <EditText
-                    android:id="@+id/input_layout_password"
+                    android:id="@+id/input_customer_email"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:inputType="textEmailAddress"
                     android:hint="@string/form_customer_email_placeholder"/>
 
             </android.support.design.widget.TextInputLayout>
