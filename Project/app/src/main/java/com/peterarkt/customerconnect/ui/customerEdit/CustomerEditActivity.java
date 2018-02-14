@@ -1,9 +1,14 @@
 package com.peterarkt.customerconnect.ui.customerEdit;
 
 
+import android.content.Intent;
 import android.databinding.DataBindingUtil;
+import android.net.Uri;
+import android.os.PersistableBundle;
+import android.provider.MediaStore;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
+import android.support.v4.content.FileProvider;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -19,6 +24,13 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.peterarkt.customerconnect.R;
 import com.peterarkt.customerconnect.databinding.ActivityCustomerEditBinding;
+import com.peterarkt.customerconnect.ui.utils.MediaUtils;
+import com.squareup.picasso.Picasso;
+
+import java.io.File;
+import java.io.IOException;
+
+import timber.log.Timber;
 
 public class CustomerEditActivity extends AppCompatActivity  implements OnMapReadyCallback {
 
@@ -26,8 +38,12 @@ public class CustomerEditActivity extends AppCompatActivity  implements OnMapRea
     public static final int LOAD_CUSTOMER_LOADER_ID = 7100;
     public static final int SAVE_CUSTOMER_LOADER_ID = 7101;
 
+    // For Camera / Attach pictures
+    static final int REQUEST_IMAGE_PHOTO = 2001;
+
     // For SavedBundleInstance
     public static final String CUSTOMER_IS_SAVING = "CUSTOMER_IS_SAVING";
+    public static final String PANEL_VIEW_MODEL   = "PANEL_VIEW_MODEL";
 
     //
     private String panelMode = "INS";
@@ -62,6 +78,14 @@ public class CustomerEditActivity extends AppCompatActivity  implements OnMapRea
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map_fragment);
         mapFragment.getMapAsync(this);
 
+        //
+        mBinding.photoLayout.actionTakePhoto.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                openCamera();
+            }
+        });
+
         // Set Action to the "Save Button".
         mBinding.actionSaveCustomer.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -71,6 +95,15 @@ public class CustomerEditActivity extends AppCompatActivity  implements OnMapRea
             }
         });
 
+        // Set Action to the "Delete Customer Photo button"
+        mBinding.photoLayout.actionDeleteCustomerPhoto.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                viewModel.customerPhotoPath = "";
+                viewModel.photoReadyToLoad  = false;
+                refreshCustomerPhotoUI();
+            }
+        });
 
         // -------------------------------------------------
         // Recover any saved state.
@@ -111,7 +144,68 @@ public class CustomerEditActivity extends AppCompatActivity  implements OnMapRea
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         outState.putBoolean(CUSTOMER_IS_SAVING,customerIsSaving);
+        outState.putParcelable(PANEL_VIEW_MODEL,viewModel);
         super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        if(savedInstanceState.containsKey(PANEL_VIEW_MODEL))
+            viewModel = savedInstanceState.getParcelable(PANEL_VIEW_MODEL);
+    }
+
+    /* -----------------------------------------------------------------------------------------------------------------
+        * Open Camera helper
+        ----------------------------------------------------------------------------------------------------------------- */
+    private void openCamera() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        // Ensure that there's a camera activity to handle the intent
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            // Create the File where the photo should go
+            File photoFile = null;
+            try {
+                // Create the file.
+                photoFile = MediaUtils.createImageFile(this);
+
+                // Get the Image path.
+                viewModel.customerPhotoPath = photoFile.getAbsolutePath();
+
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+            // Continue only if the File was successfully created
+            if (photoFile != null) {
+                Uri photoURI = FileProvider.getUriForFile(this,
+                                                            getString(R.string.content_authority_for_file_provider),
+                                                            photoFile);
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                startActivityForResult(takePictureIntent, REQUEST_IMAGE_PHOTO);
+            }
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_IMAGE_PHOTO && resultCode == RESULT_OK) {
+            viewModel.photoReadyToLoad = true;
+            refreshCustomerPhotoUI();
+        }
+    }
+
+    private void refreshCustomerPhotoUI(){
+        if(viewModel.photoReadyToLoad && !viewModel.customerPhotoPath.isEmpty()){
+            mBinding.photoLayout.addOrAttachPhotoContainer.setVisibility(View.GONE);
+            mBinding.photoLayout.validPhotoContainer.setVisibility(View.VISIBLE);
+            Timber.i("File path:" + viewModel.customerPhotoPath);
+            Picasso.with(this)
+                    .load("file://"+ viewModel.customerPhotoPath)
+                    .error(R.drawable.ic_material_error_gray)
+                    .fit()
+                    .into(mBinding.photoLayout.inputCustomerPhotoImageView);
+        }else{
+            mBinding.photoLayout.validPhotoContainer.setVisibility(View.GONE);
+            mBinding.photoLayout.addOrAttachPhotoContainer.setVisibility(View.VISIBLE);
+        }
     }
 
     /* -----------------------------------------------------------------------------------------------------------------
@@ -181,6 +275,4 @@ public class CustomerEditActivity extends AppCompatActivity  implements OnMapRea
         public void onLoaderReset(Loader<String> loader) {
         }
     };
-
-
 }

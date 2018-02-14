@@ -19,7 +19,7 @@ import com.peterarkt.customerconnect.R;
 import com.peterarkt.customerconnect.database.contracts.VisitContract;
 import com.peterarkt.customerconnect.database.provider.CustomerDBUtils;
 import com.peterarkt.customerconnect.databinding.FragmentCustomerVisitsBinding;
-import com.peterarkt.customerconnect.ui.CustomerConnectUIUtils;
+import com.peterarkt.customerconnect.ui.utils.CustomerConnectUIUtils;
 import com.peterarkt.customerconnect.ui.customerDetail.customerDetailVisits.customerNewVisitDialog.CustomerNewVisitDialogFragment;
 
 import java.util.Date;

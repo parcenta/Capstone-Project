@@ -34,11 +34,30 @@
                     android:layout_height="wrap_content"
                     android:background="#555">
 
-                    <ImageView
-                        android:id="@+id/input_customer_photo_view"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"/>
 
+                    <!-- Image Container -->
+                    <FrameLayout
+                        android:id="@+id/valid_photo_container"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:minHeight="200dp">
+                        <ImageView
+                            android:id="@+id/input_customer_photo_image_view"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:scaleType="fitCenter"
+                            android:minHeight="200dp"
+                            />
+                        <ImageButton
+                            android:id="@+id/action_delete_customer_photo"
+                            android:layout_width="56dp"
+                            android:layout_height="56dp"
+                            style="@style/Base.Widget.AppCompat.Button.Borderless"
+                            android:src="@drawable/ic_material_delete_image_white"
+                            android:layout_gravity="end"/>
+                    </FrameLayout>
+
+                    <!-- Add or Attach Container -->
                     <LinearLayout
                         android:id="@+id/add_or_attach_photo_container"
                         android:layout_width="wrap_content"

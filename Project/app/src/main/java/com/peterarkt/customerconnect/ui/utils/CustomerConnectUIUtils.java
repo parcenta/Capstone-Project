@@ -1,4 +1,4 @@
-package com.peterarkt.customerconnect.ui;
+package com.peterarkt.customerconnect.ui.utils;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;

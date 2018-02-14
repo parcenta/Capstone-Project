@@ -2,6 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.peterarkt.customerconnect">
 
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
     <application
         android:name=".CustomerConnectApplication"
         android:allowBackup="true"
@@ -22,10 +26,22 @@
             </intent-filter>
         </activity>
 
+        <!-- DB Provider -->
         <provider
             android:name=".database.provider.CustomerConnectProvider"
             android:authorities="@string/content_authority"
             android:exported="true" />
+
+        <!-- File Provider -->
+        <provider
+            android:name="android.support.v4.content.FileProvider"
+            android:authorities="@string/content_authority_for_file_provider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths"></meta-data>
+        </provider>
 
         <activity android:name=".ui.customerEdit.CustomerEditActivity" />
         <activity android:name=".ui.customerDetail.CustomerDetailActivity"></activity>

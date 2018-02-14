@@ -2,6 +2,7 @@
     <!-- Main strings -->
     <string name="app_name">CustomerConnect</string>
     <string name="content_authority">com.peterarkt.customerconnect</string>
+    <string name="content_authority_for_file_provider">com.peterarkt.customerconnect.fileprovider</string>
 
     <!-- Customer List Fragment -->
     <string name="add_new_customer">Add Customer</string>
