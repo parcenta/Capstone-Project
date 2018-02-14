@@ -22,7 +22,7 @@
     <string name="take_photo">Take</string>
     <string name="or">or</string>
 
-    <string name="customer_created_successfully">Created successfully...</string>
+    <string name="customer_created_successfully">Created successfully…</string>
     <string name="customer_name_is_required">Name is required.</string>
     <string name="customer_address_street_is_required">Address Street is required.</string>
 
@@ -31,6 +31,14 @@
     <string name="send_email">Send email</string>
     <string name="call">Call</string>
 
+    <!-- Customer Visits -->
+    <string name="no_visits_found">No visits found</string>
+    <string name="enter_commentary_hint">Commentary</string>
+    <string name="new_visit">New visit</string>
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+    <string name="visit_created_successfully">Created successfully…</string>
+    <string name="commentary_required">A commentary is required…</string>
 
     <string-array name="phone_types_array">
         <item>Home</item>

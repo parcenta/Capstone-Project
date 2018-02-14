@@ -33,7 +33,7 @@ public class CustomerConnectDBUtils {
                 CREATE_TABLE_SQL = "CREATE TABLE "  + VisitContract.VisitEntry.TABLE_NAME + " (" +
                         VisitContract.VisitEntry._ID                      + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                         VisitContract.VisitEntry.COLUMN_CUSTOMER_ID       + " INTEGER NOT NULL, " +
-                        VisitContract.VisitEntry.COLUMN_VISIT_DATETIME    + " DATETIME NOT NULL, " +
+                        VisitContract.VisitEntry.COLUMN_VISIT_DATETIME    + " INTEGER NOT NULL, " +
                         VisitContract.VisitEntry.COLUMN_VISIT_COMMENTARY  + " TEXT NOT NULL); ";
                 break;
         }

@@ -28,7 +28,7 @@ public class CustomerDetailInfoFragment extends Fragment  implements LoaderManag
 
 
     private static final String CUSTOMER_ID = "CUSTOMER_ID";
-    private static int LOAD_CUSTOMER_INFO_FROM_CUSTOMER_DETAIL_INFO = 8002;
+    private static final int LOAD_CUSTOMER_INFO_FROM_CUSTOMER_DETAIL_INFO = 8002;
 
     // Received Customer Id.
     int mCustomerId;

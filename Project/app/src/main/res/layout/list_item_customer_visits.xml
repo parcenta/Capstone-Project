@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="16dp">
+
+        <!-- Name and Address Holder -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+            <TextView
+                android:id="@+id/item_visit_commentary"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                style="@style/CustomerConnect.Text.ListItem.Primary"
+                tools:text="This is a commentary for the people"/>
+            <TextView
+                android:id="@+id/item_visit_date"
+                android:layout_width="wrap_content"
+                style="@style/CustomerConnect.Text.ListItem.Secondary"
+                android:paddingStart="8dp"
+                tools:text="Ene 18"/>
+        </LinearLayout>
+
+    </LinearLayout>
+</layout>

@@ -6,6 +6,7 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 
 import com.peterarkt.customerconnect.ui.customerDetail.customerDetailHeader.CustomerDetailHeaderFragment;
 import com.peterarkt.customerconnect.ui.customerDetail.customerDetailInfo.CustomerDetailInfoFragment;
+import com.peterarkt.customerconnect.ui.customerDetail.customerDetailVisits.CustomerVisitsFragment;
 
 /**
  * Created by Andrés on 2/8/18.
@@ -32,10 +33,10 @@ public class CustomerDetailPagerAdapter extends FragmentStatePagerAdapter{
     @Override
     public Fragment getItem(int position) {
         switch (position) {
-            case 0: // Fragment # 0 - This will show FirstFragment
+            case 0: // Tab "Detail"
                 return CustomerDetailInfoFragment.newInstance(mCustomerId);
-            case 1: // Fragment # 0 - This will show FirstFragment different title
-                return CustomerDetailHeaderFragment.newInstance(mCustomerId);
+            case 1: // Tab "Visits"
+                return CustomerVisitsFragment.newInstance(mCustomerId);
             default:
                 return null;
         }
