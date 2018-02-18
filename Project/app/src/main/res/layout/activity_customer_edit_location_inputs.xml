@@ -108,11 +108,10 @@
                 style="@style/CustomerConnect.Form.SectionImage"
                 />
 
-            <fragment
+            <FrameLayout
                 android:id="@+id/map_fragment"
                 android:layout_width="match_parent"
-                android:layout_height="200dp"
-                class="com.google.android.gms.maps.SupportMapFragment" />
+                android:layout_height="200dp" />
 
 
         </LinearLayout>

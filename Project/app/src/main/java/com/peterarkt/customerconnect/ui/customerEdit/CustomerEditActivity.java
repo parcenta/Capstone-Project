@@ -12,6 +12,8 @@ import android.os.Looper;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.FileProvider;
@@ -33,16 +35,19 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
+import com.jakewharton.rxbinding.widget.RxAdapterView;
+import com.jakewharton.rxbinding.widget.RxTextView;
 import com.peterarkt.customerconnect.R;
 import com.peterarkt.customerconnect.databinding.ActivityCustomerEditBinding;
+import com.peterarkt.customerconnect.ui.utils.Constants;
 import com.peterarkt.customerconnect.ui.utils.MediaUtils;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
 import java.io.IOException;
 
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
 import timber.log.Timber;
 
 public class CustomerEditActivity extends AppCompatActivity implements OnMapReadyCallback {
@@ -55,12 +60,8 @@ public class CustomerEditActivity extends AppCompatActivity implements OnMapRead
     private String mPanelMode;
     private int mCustomerId;
 
-
     // Panel Variables that must persist.
     private boolean customerIsSaving = false;
-    private String mPhotoPath = "";
-    private double mLatitude = 0.00;
-    private double mLongitude = 0.00;
 
     // For Loaders
     public static final int LOAD_CUSTOMER_LOADER_ID = 7100;
@@ -71,13 +72,13 @@ public class CustomerEditActivity extends AppCompatActivity implements OnMapRead
 
     // For SavedBundleInstance
     public static final String CUSTOMER_IS_SAVING = "CUSTOMER_IS_SAVING";
-    public static final String LATITUDE = "LATITUDE";
-    public static final String LONGITUDE = "LONGITUDE";
-    public static final String PHOTO_PATH = "PHOTO_PATH";
+    public static final String PANEL_VIEW_MODEL = "PANEL_VIEW_MODEL";
 
     // Binding.
     ActivityCustomerEditBinding mBinding;
-    CustomerEditViewModel viewModel;
+
+    // Model that will help us to preserve the screen rotation.
+    private CustomerEditViewModel mViewModel;
 
     // For Location
     private final static int LOCATION_PERMISSION_GRANTED_ID = 6001;
@@ -112,25 +113,38 @@ public class CustomerEditActivity extends AppCompatActivity implements OnMapRead
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // Binding the view.
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_customer_edit);
 
         // Get Values from intent
         Intent receivedIntent = getIntent();
-        mPanelMode = receivedIntent.hasExtra(PANEL_MODE) ? receivedIntent.getStringExtra(PANEL_MODE) : "";
+        mPanelMode  = receivedIntent.hasExtra(PANEL_MODE) ? receivedIntent.getStringExtra(PANEL_MODE) : "";
         mCustomerId = receivedIntent.hasExtra(CUSTOMER_ID) ? receivedIntent.getIntExtra(CUSTOMER_ID, 0) : 0;
 
+        // Init the ViewModel.
+        mViewModel = new CustomerEditViewModel();
+
+        // Set changes listeners (text changes, etc) to the inputs in order to mantain the viewModel variable as updated as posible.
+        setChangeListenersForViewModel();
 
         // Set Spinner
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.phone_types_array, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mBinding.phoneLayout.inputCustomerPhoneTypeSpinner.setAdapter(adapter);
 
-
-        // Set the Map Fragment
+        // Set the Map Fragment (Loading the Map fragment this way, avoid that it delays the first time that it opens)
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map_fragment);
+        if (mapFragment == null) {
+            FragmentManager fm = getSupportFragmentManager();
+            mapFragment = new SupportMapFragment();
+            FragmentTransaction ft = fm.beginTransaction();
+            ft.replace(R.id.map_fragment, mapFragment, "mapFragment");
+            ft.commit();
+            fm.executePendingTransactions();
+        }
         mapFragment.getMapAsync(this);
 
-        //
+        // Take photo action.
         mBinding.photoLayout.actionTakePhoto.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -151,7 +165,7 @@ public class CustomerEditActivity extends AppCompatActivity implements OnMapRead
         mBinding.photoLayout.actionDeleteCustomerPhoto.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mPhotoPath = "";
+                mViewModel.customerPhotoPath = "";
                 refreshCustomerPhotoUI();
             }
         });
@@ -164,17 +178,27 @@ public class CustomerEditActivity extends AppCompatActivity implements OnMapRead
             }
         });
 
+
+        switch (mPanelMode){
+            case Constants.UPDATE_MODE:
+                break;
+            default: // INSERT MODE
+                if(savedInstanceState != null){
+
+                    // Recovering the viewmodel
+                    mViewModel = savedInstanceState.getParcelable(PANEL_VIEW_MODEL);
+
+                    // Refreshing the UI with the recoverd ViewModel (Im managing if the viewmodel is null inside the method)
+                    setupUIFromViewModel();
+                }
+        }
+
         // ---------------------------------------------------------------------------------
         // If customer was saving (Remembered we recovered the value in onRestoreInstance)
         // ---------------------------------------------------------------------------------
         if (customerIsSaving)
             getSupportLoaderManager().initLoader(SAVE_CUSTOMER_LOADER_ID, null, saveCustomerLoaderListener);
 
-        // Refreshing the Map.
-        refreshMap();
-
-        // Refresh the Photo Holder
-        refreshCustomerPhotoUI();
     }
 
     /* -----------------------------------------------------------------------------------------------------------------
@@ -184,21 +208,20 @@ public class CustomerEditActivity extends AppCompatActivity implements OnMapRead
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        // Add a marker in Sydney, Australia, and move the camera.
-
+        refreshMap();
     }
 
     private void refreshMap() {
-        if (mMap == null) return;
+        if (mMap == null || mViewModel == null) return;
 
         // Clearing the map.
         mMap.clear();
 
         // If there is a valid Latitude and Longitude, then show the marker in that position.
-        if (mLatitude != 0.00 || mLongitude != 0.00) {
-            LatLng coordinates = new LatLng(mLatitude, mLongitude);
+        if (mViewModel.customerAddressLatitude != 0.00 || mViewModel.customerAddressLongitude != 0.00) {
+            LatLng coordinates = new LatLng(mViewModel.customerAddressLatitude, mViewModel.customerAddressLongitude);
             mMap.addMarker(new MarkerOptions().position(coordinates).title("Current Position"));
-            mMap.moveCamera(CameraUpdateFactory.newLatLng(coordinates));
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(coordinates, 16));
         }
     }
 
@@ -208,18 +231,8 @@ public class CustomerEditActivity extends AppCompatActivity implements OnMapRead
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         outState.putBoolean(CUSTOMER_IS_SAVING, customerIsSaving);
-        outState.putDouble(LATITUDE, mLatitude);
-        outState.putDouble(LONGITUDE, mLongitude);
-        outState.putString(PHOTO_PATH, mPhotoPath);
+        outState.putParcelable(PANEL_VIEW_MODEL, mViewModel);
         super.onSaveInstanceState(outState);
-    }
-
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        customerIsSaving = savedInstanceState.getBoolean(CUSTOMER_IS_SAVING);
-        mLatitude = savedInstanceState.getDouble(LATITUDE);
-        mLongitude = savedInstanceState.getDouble(LONGITUDE);
-        mPhotoPath = savedInstanceState.getString(PHOTO_PATH);
     }
 
     /* -----------------------------------------------------------------------------------------------------------------
@@ -236,7 +249,7 @@ public class CustomerEditActivity extends AppCompatActivity implements OnMapRead
                 photoFile = MediaUtils.createImageFile(this);
 
                 // Get the Image path.
-                mPhotoPath = photoFile.getAbsolutePath();
+                mViewModel.customerPhotoPath = photoFile.getAbsolutePath();
 
             } catch (IOException ex) {
                 ex.printStackTrace();
@@ -257,10 +270,33 @@ public class CustomerEditActivity extends AppCompatActivity implements OnMapRead
         if (requestCode == REQUEST_IMAGE_PHOTO && resultCode == RESULT_OK) refreshCustomerPhotoUI();
     }
 
+
+    /* -----------------------------------------------------------------------------------------------------------------
+    * UI Refreshers
+    ----------------------------------------------------------------------------------------------------------------- */
+    private void setupUIFromViewModel(){
+        if(mViewModel == null) return;
+
+        mBinding.basicInfoLayout.inputCustomerName.setText(mViewModel.customerName);
+        mBinding.emailLayout.inputCustomerEmail.setText(mViewModel.customerEmail);
+        mBinding.phoneLayout.inputCustomerPhoneNumber.setText(mViewModel.customerPhoneNumber);
+        mBinding.locationLayout.inputCustomerAddressStreet.setText(mViewModel.customerAddressStreet);
+        mBinding.locationLayout.inputCustomerAddressCity.setText(mViewModel.customerAddressCity);
+        mBinding.locationLayout.inputCustomerAddressCountry.setText(mViewModel.customerAdressCountry);
+
+        // Refreshing the Map.
+        refreshMap();
+
+        // Refresh the Photo Holder
+        refreshCustomerPhotoUI();
+    }
+
     private void refreshCustomerPhotoUI() {
 
+        if(mViewModel == null) return;
+
         // If Photo Path is empty, then show the Attach or Add buttons.
-        if (mPhotoPath.isEmpty()) {
+        if (mViewModel.customerPhotoPath.isEmpty()) {
             Timber.i("File path is empty...");
             mBinding.photoLayout.validPhotoContainer.setVisibility(View.GONE);
             mBinding.photoLayout.addOrAttachPhotoContainer.setVisibility(View.VISIBLE);
@@ -268,11 +304,11 @@ public class CustomerEditActivity extends AppCompatActivity implements OnMapRead
         }
 
         // If Photo Path is valid...
-        Timber.i("File path:" + mPhotoPath);
+        Timber.i("File path:" + mViewModel.customerPhotoPath);
         mBinding.photoLayout.addOrAttachPhotoContainer.setVisibility(View.GONE);
         mBinding.photoLayout.validPhotoContainer.setVisibility(View.VISIBLE);
         Picasso.with(this)
-                .load("file://"+mPhotoPath)
+                .load("file://" + mViewModel.customerPhotoPath)
                 .error(R.drawable.ic_material_error_gray)
                 .fit()
                 .into(mBinding.photoLayout.inputCustomerPhotoImageView);
@@ -316,9 +352,9 @@ public class CustomerEditActivity extends AppCompatActivity implements OnMapRead
                     stopLocationUpdates();
 
                     // Set the latitude and longitude from the valid location.
-                    mLatitude   = location.getLatitude();
-                    mLongitude  = location.getLongitude();
-                    Timber.d("Latitude: " + mLatitude + ", Longitude:" + mLongitude);
+                    mViewModel.customerAddressLatitude   = location.getLatitude();
+                    mViewModel.customerAddressLongitude  = location.getLongitude();
+                    Timber.d("Latitude: " + mViewModel.customerAddressLatitude + ", Longitude:" + mViewModel.customerAddressLongitude);
 
                     // Refreshing the map with the given coordinates
                     refreshMap();
@@ -334,6 +370,11 @@ public class CustomerEditActivity extends AppCompatActivity implements OnMapRead
     private void stopLocationUpdates(){
         try {
             if (mFusedLocationClient!= null) mFusedLocationClient.removeLocationUpdates(mLocationCallback);
+
+            // Hide Progress bar.
+            mBinding.locationLayout.currentLocationProgressBar.setVisibility(View.GONE);
+            mBinding.locationLayout.actionSearchCurrentLocation.setVisibility(View.VISIBLE);
+
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -360,9 +401,87 @@ public class CustomerEditActivity extends AppCompatActivity implements OnMapRead
         stopLocationUpdates();
     }
 
+     /* -----------------------------------------------------------------------------------------------------------------
+     * Change listeners for ViewModel
+     -------------------------------------------------------------------------------------------------------------------*/
+    private void setChangeListenersForViewModel(){
+
+        // Customer name
+        RxTextView.textChanges(mBinding.basicInfoLayout.inputCustomerName)
+                .subscribeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<CharSequence>() {
+                    @Override
+                    public void call(CharSequence charSequence) {
+                        Timber.i("CustomerName: "+charSequence.toString());
+                        mViewModel.customerName = charSequence.toString();
+                    }
+                });
+
+        // Phone number
+        RxTextView.textChanges(mBinding.phoneLayout.inputCustomerPhoneNumber)
+                .subscribeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<CharSequence>() {
+                    @Override
+                    public void call(CharSequence charSequence) {
+                        mViewModel.customerPhoneNumber = charSequence.toString();
+                    }
+                });
+
+        // PhoneType (Spinner)
+        RxAdapterView.itemSelections(mBinding.phoneLayout.inputCustomerPhoneTypeSpinner)
+                .subscribeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<Integer>() {
+                    @Override
+                    public void call(Integer integer) {
+                        mViewModel.customerPhoneType = integer.toString();
+                    }
+                });
+
+        // Customer Email.
+        RxTextView.textChanges(mBinding.emailLayout.inputCustomerEmail)
+                .subscribeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<CharSequence>() {
+                    @Override
+                    public void call(CharSequence charSequence) {
+                        mViewModel.customerEmail = charSequence.toString();
+                    }
+                });
+
+        // Customer address street.
+        RxTextView.textChanges(mBinding.locationLayout.inputCustomerAddressStreet)
+                .subscribeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<CharSequence>() {
+                    @Override
+                    public void call(CharSequence charSequence) {
+                        mViewModel.customerAddressStreet = charSequence.toString();
+                    }
+                });
+
+        // Customer address country.
+        RxTextView.textChanges(mBinding.locationLayout.inputCustomerAddressCountry)
+                .subscribeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<CharSequence>() {
+                    @Override
+                    public void call(CharSequence charSequence) {
+                        mViewModel.customerAdressCountry = charSequence.toString();
+                    }
+                });
+
+        // Customer address city.
+        RxTextView.textChanges(mBinding.locationLayout.inputCustomerAddressCity)
+                .subscribeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<CharSequence>() {
+                    @Override
+                    public void call(CharSequence charSequence) {
+                        mViewModel.customerAddressCity = charSequence.toString();
+                    }
+                });
+
+    }
+
     /* -----------------------------------------------------------------------------------------------------------------
-             * Save Customer Loader
-             -------------------------------------------------------------------------------------------------------------------*/
+     * Save Customer Loader
+     -------------------------------------------------------------------------------------------------------------------*/
     private LoaderManager.LoaderCallbacks<String> saveCustomerLoaderListener
             = new LoaderManager.LoaderCallbacks<String>(){
 
@@ -383,24 +502,8 @@ public class CustomerEditActivity extends AppCompatActivity implements OnMapRead
 
                 @Override
                 public String loadInBackground() {
-
-                    if(mBinding == null) return "An error has ocurred. Please try again.";
-
-                    // Extracting data from the views into one single object.
-                    CustomerEditViewModel newCustomer     = new CustomerEditViewModel();
-                    newCustomer.customerId                  = 0; // If the CustomerId is zero, internally will create an ID in INS mode.
-                    newCustomer.customerName                = mBinding.basicInfoLayout.inputCustomerName.getText().toString().trim();
-                    newCustomer.customerPhoneNumber         = mBinding.phoneLayout.inputCustomerPhoneNumber.getText().toString().trim();
-                    newCustomer.customerEmail               = mBinding.emailLayout.inputCustomerEmail.getText().toString().trim();
-                    newCustomer.customerPhoneType           = String.valueOf(mBinding.phoneLayout.inputCustomerPhoneTypeSpinner.getSelectedItemId());
-                    newCustomer.customerAddressStreet       = mBinding.locationLayout.inputCustomerAddressStreet.getText().toString();
-                    newCustomer.customerAddressCity         = mBinding.locationLayout.inputCustomerAddressCity.getText().toString();
-                    newCustomer.customerAdressCountry       = mBinding.locationLayout.inputCustomerAddressCountry.getText().toString();
-                    newCustomer.customerAddressLatitude     = mLatitude;
-                    newCustomer.customerAddressLatitude     = mLongitude;
-                    newCustomer.customerPhotoPath           = mPhotoPath;
-
-                    return CustomerEditHelper.createCustomer(CustomerEditActivity.this,newCustomer);
+                    if(mViewModel == null) return "An error has ocurred. Please try again.";
+                    return CustomerEditHelper.createCustomer(CustomerEditActivity.this,mViewModel);
                 }
 
                 @Override
