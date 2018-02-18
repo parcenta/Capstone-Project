@@ -85,10 +85,17 @@
 
 
             <ImageButton
+                android:id="@+id/action_search_current_location"
                 android:layout_width="56dp"
                 android:layout_height="56dp"
                 style="@style/Widget.AppCompat.Button.Borderless"
                 android:src="@drawable/ic_material_my_location_gray"/>
+
+            <ProgressBar
+                android:id="@+id/current_location_progress_bar"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:visibility="gone"/>
 
         </LinearLayout>
 

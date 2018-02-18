@@ -1,11 +1,17 @@
 package com.peterarkt.customerconnect.ui.customerEdit;
 
 
+import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.databinding.DataBindingUtil;
+import android.location.Location;
 import android.net.Uri;
-import android.os.PersistableBundle;
+import android.os.Looper;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.FileProvider;
@@ -16,12 +22,19 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.peterarkt.customerconnect.R;
 import com.peterarkt.customerconnect.databinding.ActivityCustomerEditBinding;
 import com.peterarkt.customerconnect.ui.utils.MediaUtils;
@@ -32,7 +45,22 @@ import java.io.IOException;
 
 import timber.log.Timber;
 
-public class CustomerEditActivity extends AppCompatActivity  implements OnMapReadyCallback {
+public class CustomerEditActivity extends AppCompatActivity implements OnMapReadyCallback {
+
+    // For Intent Variables
+    private static String PANEL_MODE = "PANEL_MODE";
+    private static String CUSTOMER_ID = "CUSTOMER_ID";
+
+    // Intent Variables
+    private String mPanelMode;
+    private int mCustomerId;
+
+
+    // Panel Variables that must persist.
+    private boolean customerIsSaving = false;
+    private String mPhotoPath = "";
+    private double mLatitude = 0.00;
+    private double mLongitude = 0.00;
 
     // For Loaders
     public static final int LOAD_CUSTOMER_LOADER_ID = 7100;
@@ -43,29 +71,53 @@ public class CustomerEditActivity extends AppCompatActivity  implements OnMapRea
 
     // For SavedBundleInstance
     public static final String CUSTOMER_IS_SAVING = "CUSTOMER_IS_SAVING";
-    public static final String PANEL_VIEW_MODEL   = "PANEL_VIEW_MODEL";
-
-    //
-    private String panelMode = "INS";
-
-    // Panel status flags.
-    private boolean customerIsSaving;
+    public static final String LATITUDE = "LATITUDE";
+    public static final String LONGITUDE = "LONGITUDE";
+    public static final String PHOTO_PATH = "PHOTO_PATH";
 
     // Binding.
     ActivityCustomerEditBinding mBinding;
-
     CustomerEditViewModel viewModel;
 
-
+    // For Location
+    private final static int LOCATION_PERMISSION_GRANTED_ID = 6001;
+    private FusedLocationProviderClient mFusedLocationClient;
+    private LocationRequest mLocationRequest;
+    private LocationCallback mLocationCallback;
 
     // Map
     private GoogleMap mMap;
 
+
+    /* -----------------------------------------------------------------
+     * Launch Helper
+     * -----------------------------------------------------------------*/
+    public static void launch(Context context, String panelMode, int customerId) {
+        context.startActivity(launchIntent(context, panelMode, customerId));
+    }
+
+    private static Intent launchIntent(Context context, String panelMode, int customerId) {
+        Class destinationActivity = CustomerEditActivity.class;
+        Intent intent = new Intent(context, destinationActivity);
+        intent.putExtra(PANEL_MODE, panelMode);
+        intent.putExtra(CUSTOMER_ID, customerId);
+        return intent;
+    }
+
+
+    /* -----------------------------------------------------------------
+     * OnCreate
+     * -----------------------------------------------------------------*/
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mBinding = DataBindingUtil.setContentView(this,R.layout.activity_customer_edit);
+        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_customer_edit);
+
+        // Get Values from intent
+        Intent receivedIntent = getIntent();
+        mPanelMode = receivedIntent.hasExtra(PANEL_MODE) ? receivedIntent.getStringExtra(PANEL_MODE) : "";
+        mCustomerId = receivedIntent.hasExtra(CUSTOMER_ID) ? receivedIntent.getIntExtra(CUSTOMER_ID, 0) : 0;
 
 
         // Set Spinner
@@ -91,7 +143,7 @@ public class CustomerEditActivity extends AppCompatActivity  implements OnMapRea
             @Override
             public void onClick(View view) {
                 customerIsSaving = true;
-                getSupportLoaderManager().restartLoader(SAVE_CUSTOMER_LOADER_ID,null,saveCustomerLoaderListener);
+                getSupportLoaderManager().restartLoader(SAVE_CUSTOMER_LOADER_ID, null, saveCustomerLoaderListener);
             }
         });
 
@@ -99,64 +151,80 @@ public class CustomerEditActivity extends AppCompatActivity  implements OnMapRea
         mBinding.photoLayout.actionDeleteCustomerPhoto.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                viewModel.customerPhotoPath = "";
-                viewModel.photoReadyToLoad  = false;
+                mPhotoPath = "";
                 refreshCustomerPhotoUI();
             }
         });
 
-        // -------------------------------------------------
-        // Recover any saved state.
-        // -------------------------------------------------
+        // Set action to get current location.
+        mBinding.locationLayout.actionSearchCurrentLocation.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                getCurrentLocation();
+            }
+        });
 
-        // Init some values.
-        viewModel = new CustomerEditViewModel();
-        customerIsSaving = false;
+        // ---------------------------------------------------------------------------------
+        // If customer was saving (Remembered we recovered the value in onRestoreInstance)
+        // ---------------------------------------------------------------------------------
+        if (customerIsSaving)
+            getSupportLoaderManager().initLoader(SAVE_CUSTOMER_LOADER_ID, null, saveCustomerLoaderListener);
 
-        // Recovering values.
-        if(savedInstanceState != null){
-            // If customer was in the middle of saving, then init its respective loader.
-            customerIsSaving = savedInstanceState.containsKey(CUSTOMER_IS_SAVING) && savedInstanceState.getBoolean(CUSTOMER_IS_SAVING);
-            if (customerIsSaving)
-                getSupportLoaderManager().initLoader(SAVE_CUSTOMER_LOADER_ID,null,saveCustomerLoaderListener);
+        // Refreshing the Map.
+        refreshMap();
 
-
-            // Recovering Customer viewModel.
-
-        }
-
-
+        // Refresh the Photo Holder
+        refreshCustomerPhotoUI();
     }
 
-    /*
+    /* -----------------------------------------------------------------------------------------------------------------
     * Map Fragment
-    * */
+    * -----------------------------------------------------------------------------------------------------------------*/
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
         // Add a marker in Sydney, Australia, and move the camera.
-        LatLng coordinates = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(coordinates).title("Current Position"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(coordinates));
+
     }
 
+    private void refreshMap() {
+        if (mMap == null) return;
+
+        // Clearing the map.
+        mMap.clear();
+
+        // If there is a valid Latitude and Longitude, then show the marker in that position.
+        if (mLatitude != 0.00 || mLongitude != 0.00) {
+            LatLng coordinates = new LatLng(mLatitude, mLongitude);
+            mMap.addMarker(new MarkerOptions().position(coordinates).title("Current Position"));
+            mMap.moveCamera(CameraUpdateFactory.newLatLng(coordinates));
+        }
+    }
+
+    /* -----------------------------------------------------------------------------------------------------------------
+    *   OnSaveInstance/OnRestoreInstance
+    ----------------------------------------------------------------------------------------------------------------- */
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        outState.putBoolean(CUSTOMER_IS_SAVING,customerIsSaving);
-        outState.putParcelable(PANEL_VIEW_MODEL,viewModel);
+        outState.putBoolean(CUSTOMER_IS_SAVING, customerIsSaving);
+        outState.putDouble(LATITUDE, mLatitude);
+        outState.putDouble(LONGITUDE, mLongitude);
+        outState.putString(PHOTO_PATH, mPhotoPath);
         super.onSaveInstanceState(outState);
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        if(savedInstanceState.containsKey(PANEL_VIEW_MODEL))
-            viewModel = savedInstanceState.getParcelable(PANEL_VIEW_MODEL);
+        customerIsSaving = savedInstanceState.getBoolean(CUSTOMER_IS_SAVING);
+        mLatitude = savedInstanceState.getDouble(LATITUDE);
+        mLongitude = savedInstanceState.getDouble(LONGITUDE);
+        mPhotoPath = savedInstanceState.getString(PHOTO_PATH);
     }
 
     /* -----------------------------------------------------------------------------------------------------------------
-        * Open Camera helper
-        ----------------------------------------------------------------------------------------------------------------- */
+    * Open Camera helper
+    ----------------------------------------------------------------------------------------------------------------- */
     private void openCamera() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         // Ensure that there's a camera activity to handle the intent
@@ -168,7 +236,7 @@ public class CustomerEditActivity extends AppCompatActivity  implements OnMapRea
                 photoFile = MediaUtils.createImageFile(this);
 
                 // Get the Image path.
-                viewModel.customerPhotoPath = photoFile.getAbsolutePath();
+                mPhotoPath = photoFile.getAbsolutePath();
 
             } catch (IOException ex) {
                 ex.printStackTrace();
@@ -176,8 +244,8 @@ public class CustomerEditActivity extends AppCompatActivity  implements OnMapRea
             // Continue only if the File was successfully created
             if (photoFile != null) {
                 Uri photoURI = FileProvider.getUriForFile(this,
-                                                            getString(R.string.content_authority_for_file_provider),
-                                                            photoFile);
+                        getString(R.string.content_authority_for_file_provider),
+                        photoFile);
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
                 startActivityForResult(takePictureIntent, REQUEST_IMAGE_PHOTO);
             }
@@ -186,31 +254,115 @@ public class CustomerEditActivity extends AppCompatActivity  implements OnMapRea
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_IMAGE_PHOTO && resultCode == RESULT_OK) {
-            viewModel.photoReadyToLoad = true;
-            refreshCustomerPhotoUI();
-        }
+        if (requestCode == REQUEST_IMAGE_PHOTO && resultCode == RESULT_OK) refreshCustomerPhotoUI();
     }
 
-    private void refreshCustomerPhotoUI(){
-        if(viewModel.photoReadyToLoad && !viewModel.customerPhotoPath.isEmpty()){
-            mBinding.photoLayout.addOrAttachPhotoContainer.setVisibility(View.GONE);
-            mBinding.photoLayout.validPhotoContainer.setVisibility(View.VISIBLE);
-            Timber.i("File path:" + viewModel.customerPhotoPath);
-            Picasso.with(this)
-                    .load("file://"+ viewModel.customerPhotoPath)
-                    .error(R.drawable.ic_material_error_gray)
-                    .fit()
-                    .into(mBinding.photoLayout.inputCustomerPhotoImageView);
-        }else{
+    private void refreshCustomerPhotoUI() {
+
+        // If Photo Path is empty, then show the Attach or Add buttons.
+        if (mPhotoPath.isEmpty()) {
+            Timber.i("File path is empty...");
             mBinding.photoLayout.validPhotoContainer.setVisibility(View.GONE);
             mBinding.photoLayout.addOrAttachPhotoContainer.setVisibility(View.VISIBLE);
+            return;
         }
+
+        // If Photo Path is valid...
+        Timber.i("File path:" + mPhotoPath);
+        mBinding.photoLayout.addOrAttachPhotoContainer.setVisibility(View.GONE);
+        mBinding.photoLayout.validPhotoContainer.setVisibility(View.VISIBLE);
+        Picasso.with(this)
+                .load("file://"+mPhotoPath)
+                .error(R.drawable.ic_material_error_gray)
+                .fit()
+                .into(mBinding.photoLayout.inputCustomerPhotoImageView);
     }
 
     /* -----------------------------------------------------------------------------------------------------------------
-     * Save Customer Loader
-     -------------------------------------------------------------------------------------------------------------------*/
+    * Location Methods
+    * -----------------------------------------------------------------------------------------------------------------*/
+
+    private void getCurrentLocation() {
+        // First check if LOCATION permission is enabled. If not then ask for it.
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                || ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_GRANTED_ID);
+            return;
+        }
+
+        // Show Progress bar.
+        mBinding.locationLayout.actionSearchCurrentLocation.setVisibility(View.GONE);
+        mBinding.locationLayout.currentLocationProgressBar.setVisibility(View.VISIBLE);
+
+        // Create the Client.
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
+        // Setting the LocationRequest
+        mLocationRequest = new LocationRequest();
+        mLocationRequest.setInterval(5000); // Search location each 5 seconds.
+        mLocationRequest.setFastestInterval(2500); // Fastest interval set in 2.5 seg
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);//getLocationPriority(batteryLevel)
+
+        // Setting Location Callback
+        mLocationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                super.onLocationResult(locationResult);
+
+                Location location = locationResult.getLastLocation();
+                if (location != null){
+
+                    // Stop the Location updates, beacuse we already have a valid location.
+                    stopLocationUpdates();
+
+                    // Set the latitude and longitude from the valid location.
+                    mLatitude   = location.getLatitude();
+                    mLongitude  = location.getLongitude();
+                    Timber.d("Latitude: " + mLatitude + ", Longitude:" + mLongitude);
+
+                    // Refreshing the map with the given coordinates
+                    refreshMap();
+                }
+            }
+        };
+
+        // Start to request location updates
+        mFusedLocationClient.requestLocationUpdates(mLocationRequest,mLocationCallback, Looper.myLooper());
+
+    }
+
+    private void stopLocationUpdates(){
+        try {
+            if (mFusedLocationClient!= null) mFusedLocationClient.removeLocationUpdates(mLocationCallback);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    // Source: https://developer.android.com/training/permissions/requesting.html#java
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case LOCATION_PERMISSION_GRANTED_ID: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
+                    Toast.makeText(this,R.string.permission_granted_message,Toast.LENGTH_SHORT).show();
+                else
+                    Toast.makeText(this,R.string.permission_denied_message,Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        // Setop the location updates if the activity is paused.
+        stopLocationUpdates();
+    }
+
+    /* -----------------------------------------------------------------------------------------------------------------
+             * Save Customer Loader
+             -------------------------------------------------------------------------------------------------------------------*/
     private LoaderManager.LoaderCallbacks<String> saveCustomerLoaderListener
             = new LoaderManager.LoaderCallbacks<String>(){
 
@@ -232,20 +384,23 @@ public class CustomerEditActivity extends AppCompatActivity  implements OnMapRea
                 @Override
                 public String loadInBackground() {
 
-                    if(mBinding == null || viewModel == null ) return "An error has ocurred. Please try again.";
+                    if(mBinding == null) return "An error has ocurred. Please try again.";
 
                     // Extracting data from the views into one single object.
-                    viewModel.customerId                  = 0; // If the CustomerId is zero, internally will create an ID in INS mode.
-                    viewModel.customerName                = mBinding.basicInfoLayout.inputCustomerName.getText().toString().trim();
-                    viewModel.customerPhoneNumber         = mBinding.phoneLayout.inputCustomerPhoneNumber.getText().toString().trim();
-                    viewModel.customerEmail               = mBinding.emailLayout.inputCustomerEmail.getText().toString().trim();
-                    viewModel.customerPhoneType           = String.valueOf(mBinding.phoneLayout.inputCustomerPhoneTypeSpinner.getSelectedItemId());
-                    viewModel.customerAddressStreet       = mBinding.locationLayout.inputCustomerAddressStreet.getText().toString();
-                    viewModel.customerAddressCity         = mBinding.locationLayout.inputCustomerAddressCity.getText().toString();
-                    viewModel.customerAdressCountry       = mBinding.locationLayout.inputCustomerAddressCountry.getText().toString();
-                    // ... latitude, longitude and photo path were set in another part.
+                    CustomerEditViewModel newCustomer     = new CustomerEditViewModel();
+                    newCustomer.customerId                  = 0; // If the CustomerId is zero, internally will create an ID in INS mode.
+                    newCustomer.customerName                = mBinding.basicInfoLayout.inputCustomerName.getText().toString().trim();
+                    newCustomer.customerPhoneNumber         = mBinding.phoneLayout.inputCustomerPhoneNumber.getText().toString().trim();
+                    newCustomer.customerEmail               = mBinding.emailLayout.inputCustomerEmail.getText().toString().trim();
+                    newCustomer.customerPhoneType           = String.valueOf(mBinding.phoneLayout.inputCustomerPhoneTypeSpinner.getSelectedItemId());
+                    newCustomer.customerAddressStreet       = mBinding.locationLayout.inputCustomerAddressStreet.getText().toString();
+                    newCustomer.customerAddressCity         = mBinding.locationLayout.inputCustomerAddressCity.getText().toString();
+                    newCustomer.customerAdressCountry       = mBinding.locationLayout.inputCustomerAddressCountry.getText().toString();
+                    newCustomer.customerAddressLatitude     = mLatitude;
+                    newCustomer.customerAddressLatitude     = mLongitude;
+                    newCustomer.customerPhotoPath           = mPhotoPath;
 
-                    return CustomerEditHelper.createCustomer(CustomerEditActivity.this,viewModel);
+                    return CustomerEditHelper.createCustomer(CustomerEditActivity.this,newCustomer);
                 }
 
                 @Override

@@ -19,7 +19,7 @@ import com.peterarkt.customerconnect.R;
 import com.peterarkt.customerconnect.database.contracts.VisitContract;
 import com.peterarkt.customerconnect.database.provider.CustomerDBUtils;
 import com.peterarkt.customerconnect.databinding.FragmentCustomerVisitsBinding;
-import com.peterarkt.customerconnect.ui.utils.CustomerConnectUIUtils;
+import com.peterarkt.customerconnect.ui.utils.DateUtils;
 import com.peterarkt.customerconnect.ui.customerDetail.customerDetailVisits.customerNewVisitDialog.CustomerNewVisitDialogFragment;
 
 import java.util.Date;
@@ -216,7 +216,7 @@ public class CustomerVisitsFragment extends Fragment  implements LoaderManager.L
                     // Get Date from the record.
                     long visitDateAsLong = cursor.getLong(cursor.getColumnIndex(VisitContract.VisitEntry.COLUMN_VISIT_DATETIME));
                     Date visitDate = new Date(visitDateAsLong);
-                    String visitDateAsString = CustomerConnectUIUtils.getDateAsMMMddYYYY(visitDate);
+                    String visitDateAsString = DateUtils.getDateAsMMMddYYYY(visitDate);
 
                     // Get Commentary
                     String visitCommentary = cursor.getString(cursor.getColumnIndex(VisitContract.VisitEntry.COLUMN_VISIT_COMMENTARY));

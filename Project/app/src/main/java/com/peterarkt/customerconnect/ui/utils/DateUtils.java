@@ -9,7 +9,7 @@ import java.util.Locale;
  * Created by USUARIO on 13/02/2018.
  */
 
-public class CustomerConnectUIUtils {
+public class DateUtils {
 
     private static final String MMMddYYYYFormat = "MMM dd, yyyy";
 

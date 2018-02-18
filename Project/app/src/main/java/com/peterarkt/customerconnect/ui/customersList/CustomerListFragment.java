@@ -22,6 +22,7 @@ import com.peterarkt.customerconnect.database.contracts.CustomerContract;
 import com.peterarkt.customerconnect.databinding.FragmentCustomerListBinding;
 import com.peterarkt.customerconnect.ui.CustomerConnectMainActivityHandler;
 import com.peterarkt.customerconnect.ui.customerEdit.CustomerEditActivity;
+import com.peterarkt.customerconnect.ui.utils.Constants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -77,7 +78,7 @@ public class CustomerListFragment extends Fragment implements LoaderManager.Load
         mBinding.actionNewCustomer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(getActivity(), CustomerEditActivity.class));
+                CustomerEditActivity.launch(getActivity(), Constants.INSERT_MODE,0);
             }
         });
 

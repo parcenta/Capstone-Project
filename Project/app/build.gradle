@@ -22,7 +22,7 @@ android {
             debuggable true
 
             // Source: https://stackoverflow.com/questions/26124309/manage-google-maps-api-key-with-gradle-in-android-studio
-            resValue "string", "google_maps_api_key", "[DEBUG_GOOGLE_API_KEY]"
+            resValue "string", "google_maps_api_key", "AIzaSyCO-IOijCBTQhdQp_d0tTCcxdQ9ELt9W5M"
         }
     }
 

@@ -104,7 +104,7 @@ public class CustomerDetailHeaderFragment extends Fragment implements LoaderMana
             mBinding.customerNameTextView.setText(viewModel.customerName);
             if(!viewModel.customerPhotoPath.isEmpty()){
                 Picasso.with(getActivity())
-                        .load(viewModel.customerPhotoPath)
+                        .load("file://" + viewModel.customerPhotoPath)
                         .error(R.drawable.ic_material_person_gray)
                         .into(mBinding.customerPhotoBackgroundImageView);
             }
