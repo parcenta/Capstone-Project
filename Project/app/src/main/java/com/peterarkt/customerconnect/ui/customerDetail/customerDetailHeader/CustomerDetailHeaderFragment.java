@@ -1,6 +1,7 @@
 package com.peterarkt.customerconnect.ui.customerDetail.customerDetailHeader;
 
 
+import android.app.Activity;
 import android.content.Context;
 import android.database.Cursor;
 import android.databinding.DataBindingUtil;
@@ -11,6 +12,7 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -18,6 +20,7 @@ import com.peterarkt.customerconnect.R;
 import com.peterarkt.customerconnect.database.contracts.CustomerContract;
 import com.peterarkt.customerconnect.database.provider.CustomerDBUtils;
 import com.peterarkt.customerconnect.databinding.FragmentCustomerDetailHeaderBinding;
+import com.peterarkt.customerconnect.ui.customerDetail.CustomerDetailActivity;
 import com.squareup.picasso.Picasso;
 
 import timber.log.Timber;
@@ -74,6 +77,12 @@ public class CustomerDetailHeaderFragment extends Fragment implements LoaderMana
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         mBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_customer_detail_header, container, false);
+
+        Activity parentActivity = getActivity();
+        if(parentActivity instanceof CustomerDetailActivity)
+            ((CustomerDetailActivity) parentActivity).setToolbarInActivity(mBinding.toolbar);
+
+
         return mBinding.getRoot();
     }
 
@@ -87,9 +96,26 @@ public class CustomerDetailHeaderFragment extends Fragment implements LoaderMana
         getLoaderManager().initLoader(LOAD_CUSTOMER_INFO_FROM_CUSTOMER_DETAIL_HEADER,null,this);
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int itemId = item.getItemId();
+
+        switch (itemId){
+            case R.id.menu_edit_customer:
+                return true;
+            case R.id.menu_zoom_customer_image:
+                return true;
+            case R.id.menu_delete_customer:
+
+                return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
     /* --------------------------------------
-        * Loader methods
-        * --------------------------------------*/
+            * Loader methods
+            * --------------------------------------*/
     @Override
     public Loader<CustomerDetailHeaderViewModel> onCreateLoader(int i, Bundle bundle) {
         return new CustomerDetailHeaderAsyncTaskLoader(getActivity(),mCustomerId);

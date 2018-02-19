@@ -8,7 +8,18 @@
 
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:fitsSystemWindows="true">
+
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?actionBarSize"
+                android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+                android:background="@color/colorPrimary"
+                app:navigationIcon="@drawable/ic_material_back_arrow_white"
+                android:elevation="4dp"
+                />
 
             <!-- Source: https://stackoverflow.com/questions/1555109/stop-edittext-from-gaining-focus-at-activity-startup -->
             <!-- Dummy item to prevent first input from receiving focus -->
@@ -22,7 +33,8 @@
             <ScrollView
                 android:id="@+id/scroll_view"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                android:layout_marginTop="?actionBarSize">
 
                 <LinearLayout
                     android:layout_width="match_parent"

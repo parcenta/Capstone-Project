@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/menu_edit_customer"
+        android:icon="@drawable/ic_material_edit_white"
+        android:orderInCategory="1"
+        app:showAsAction="always"
+        android:title="@string/edit_customer" />
+
+    <item
+        android:id="@+id/menu_zoom_customer_image"
+        android:icon="@drawable/ic_material_zoom_white"
+        android:orderInCategory="2"
+        app:showAsAction="always"
+        android:title="@string/zoom_customer_photo" />
+
+    <item
+        android:id="@+id/menu_delete_customer"
+        android:icon="@drawable/ic_material_delete_image_white"
+        android:orderInCategory="3"
+        app:showAsAction="collapseActionView"
+        android:title="@string/delete_customer" />
+
+</menu>

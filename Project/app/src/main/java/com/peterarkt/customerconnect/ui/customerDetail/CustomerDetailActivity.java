@@ -8,6 +8,9 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.View;
 
 import com.peterarkt.customerconnect.R;
 import com.peterarkt.customerconnect.databinding.ActivityCustomerDetailBinding;
@@ -97,5 +100,22 @@ public class CustomerDetailActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    public void setToolbarInActivity(Toolbar toolbar){
+        setSupportActionBar(toolbar);
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onBackPressed();
+            }
+        });
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.customer_detail_menu, menu);
+        return true;
     }
 }

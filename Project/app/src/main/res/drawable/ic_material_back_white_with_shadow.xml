@@ -1,0 +1,13 @@
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape>
+            <gradient
+                android:gradientRadius="13dp"
+                android:startColor="#31000000"
+                android:endColor="#00000000"
+                android:type="radial"
+                />
+        </shape>
+    </item>
+    <item android:drawable="@drawable/ic_material_back_arrow_white"/>
+</layer-list>

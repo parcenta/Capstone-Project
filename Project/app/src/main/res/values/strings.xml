@@ -9,6 +9,7 @@
     <string name="no_customers_found">No customers found</string>
     <string name="customer_search_hint">Search by name...</string>
 
+
     <string name="an_error_has_ocurred">An error has ocurred. Please try again.</string>
     <string name="permission_denied_message">Permission was denied. Permission must be granted to complete the desired task.</string>
     <string name="permission_granted_message">Permission was granted. Please try again.</string>
@@ -25,7 +26,9 @@
     <string name="take_photo">Take</string>
     <string name="or">or</string>
     <string name="edit_customer">Edit customer</string>
+    <string name="zoom_customer_photo">Zoom image</string>
     <string name="new_customer">New customer</string>
+    <string name="delete_customer">Delete customer</string>
 
 
     <string name="customer_created_successfully">Created successfully…</string>

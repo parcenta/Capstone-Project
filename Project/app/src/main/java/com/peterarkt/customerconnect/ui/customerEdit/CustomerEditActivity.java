@@ -157,11 +157,13 @@ public class CustomerEditActivity extends AppCompatActivity implements OnMapRead
     private void setupUI(){
 
         // Set Actionbar
-        ActionBar ab = getSupportActionBar();
-        if(ab!=null){
-            ab.setTitle(mPanelMode.equalsIgnoreCase(Constants.UPDATE_MODE) ? getString(R.string.edit_customer) : getString(R.string.new_customer));
-            ab.setDisplayHomeAsUpEnabled(true);
-        }
+        mBinding.toolbar.setTitle(mPanelMode.equalsIgnoreCase(Constants.UPDATE_MODE) ? getString(R.string.edit_customer) : getString(R.string.new_customer));
+        mBinding.toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onBackPressed();
+            }
+        });
 
         // Set changes listeners (text changes, etc) to the inputs in order to mantain
         // the viewModel variable as updated as posible.

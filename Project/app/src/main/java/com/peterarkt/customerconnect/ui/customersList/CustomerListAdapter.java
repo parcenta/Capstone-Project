@@ -60,7 +60,9 @@ public class CustomerListAdapter extends RecyclerView.Adapter<CustomerListAdapte
         // Loading image in CircleImageView
         if(item.customerPhotoUrl.trim().length() > 0){
             Picasso.with(mContext)
-                    .load(item.customerPhotoUrl)
+                    .load("file://"+item.customerPhotoUrl)
+                    .fit()
+                    .centerCrop()
                     .error(R.drawable.ic_material_person_gray)
                     .into(holder.mBinding.itemCustomerImage);
         }
