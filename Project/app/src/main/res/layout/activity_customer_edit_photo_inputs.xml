@@ -46,7 +46,6 @@
                             android:id="@+id/input_customer_photo_image_view"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:scaleType="fitCenter"
                             android:minHeight="200dp"
                             />
                         <ImageButton

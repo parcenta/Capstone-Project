@@ -18,8 +18,10 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.FileProvider;
 import android.support.v4.content.Loader;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
@@ -68,7 +70,10 @@ public class CustomerEditActivity extends AppCompatActivity implements OnMapRead
     public static final int SAVE_CUSTOMER_LOADER_ID = 7101;
 
     // For Camera / Attach pictures
-    static final int REQUEST_IMAGE_PHOTO = 2001;
+    private final static int READ_EXTERNAL_STORAGE_PERMISSION_GRANTED_ID = 6002;
+    private final static int WRITE_STORAGE_AND_CAMERA_PERMISSION_GRANTED_ID = 6003;
+    static final int REQUEST_IMAGE_PHOTO_FROM_CAMERA = 2001;
+    static final int REQUEST_IMAGE_PHOTO_FROM_GALLERY = 2002;
 
     // For SavedBundleInstance
     public static final String CUSTOMER_IS_SAVING = "CUSTOMER_IS_SAVING";
@@ -113,19 +118,55 @@ public class CustomerEditActivity extends AppCompatActivity implements OnMapRead
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        Timber.i("OnCreate");
+
         // Binding the view.
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_customer_edit);
+
+        // Init the ViewModel. If there is a ViewModel in the saved instance it will be recovered
+        // after in the onRestoreInstance.
+        mViewModel = new CustomerEditViewModel();
 
         // Get Values from intent
         Intent receivedIntent = getIntent();
         mPanelMode  = receivedIntent.hasExtra(PANEL_MODE) ? receivedIntent.getStringExtra(PANEL_MODE) : "";
         mCustomerId = receivedIntent.hasExtra(CUSTOMER_ID) ? receivedIntent.getIntExtra(CUSTOMER_ID, 0) : 0;
 
-        // Init the ViewModel.
-        mViewModel = new CustomerEditViewModel();
+        // Set action bar, onclick listeners, text changes listener, etc.
+        setupUI();
 
-        // Set changes listeners (text changes, etc) to the inputs in order to mantain the viewModel variable as updated as posible.
+        // ---------------------------------------------------------------------------------
+        // If customer was saving (Remembered we recovered the value in onRestoreInstance)
+        // ---------------------------------------------------------------------------------
+        if (customerIsSaving)
+            getSupportLoaderManager().initLoader(SAVE_CUSTOMER_LOADER_ID, null, saveCustomerLoaderListener);
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Timber.i("OnResume");
+        // Like the OnRestoreInstance is called before onResume (after OnStart) and also the OnRestoreInstance
+        // recover the view model, then in this point we can use it and restore the inputs, etc.
+        // Source: https://developer.android.com/guide/components/activities/activity-lifecycle.html
+        setupUIFromViewModel();
+
+    }
+
+    private void setupUI(){
+
+        // Set Actionbar
+        ActionBar ab = getSupportActionBar();
+        if(ab!=null){
+            ab.setTitle(mPanelMode.equalsIgnoreCase(Constants.UPDATE_MODE) ? getString(R.string.edit_customer) : getString(R.string.new_customer));
+            ab.setDisplayHomeAsUpEnabled(true);
+        }
+
+        // Set changes listeners (text changes, etc) to the inputs in order to mantain
+        // the viewModel variable as updated as posible.
         setChangeListenersForViewModel();
+
 
         // Set Spinner
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.phone_types_array, android.R.layout.simple_spinner_item);
@@ -149,6 +190,12 @@ public class CustomerEditActivity extends AppCompatActivity implements OnMapRead
             @Override
             public void onClick(View view) {
                 openCamera();
+            }
+        });
+        mBinding.photoLayout.actionAttachPhoto.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                MediaUtils.launchAttachImageForGallery(CustomerEditActivity.this,READ_EXTERNAL_STORAGE_PERMISSION_GRANTED_ID,REQUEST_IMAGE_PHOTO_FROM_GALLERY);
             }
         });
 
@@ -177,28 +224,6 @@ public class CustomerEditActivity extends AppCompatActivity implements OnMapRead
                 getCurrentLocation();
             }
         });
-
-
-        switch (mPanelMode){
-            case Constants.UPDATE_MODE:
-                break;
-            default: // INSERT MODE
-                if(savedInstanceState != null){
-
-                    // Recovering the viewmodel
-                    mViewModel = savedInstanceState.getParcelable(PANEL_VIEW_MODEL);
-
-                    // Refreshing the UI with the recoverd ViewModel (Im managing if the viewmodel is null inside the method)
-                    setupUIFromViewModel();
-                }
-        }
-
-        // ---------------------------------------------------------------------------------
-        // If customer was saving (Remembered we recovered the value in onRestoreInstance)
-        // ---------------------------------------------------------------------------------
-        if (customerIsSaving)
-            getSupportLoaderManager().initLoader(SAVE_CUSTOMER_LOADER_ID, null, saveCustomerLoaderListener);
-
     }
 
     /* -----------------------------------------------------------------------------------------------------------------
@@ -230,15 +255,32 @@ public class CustomerEditActivity extends AppCompatActivity implements OnMapRead
     ----------------------------------------------------------------------------------------------------------------- */
     @Override
     protected void onSaveInstanceState(Bundle outState) {
+        Timber.i("OnSaveInstanceState");
         outState.putBoolean(CUSTOMER_IS_SAVING, customerIsSaving);
         outState.putParcelable(PANEL_VIEW_MODEL, mViewModel);
         super.onSaveInstanceState(outState);
     }
 
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        Timber.i("OnRestoreInstance");
+        customerIsSaving    = savedInstanceState.getBoolean(CUSTOMER_IS_SAVING);
+        mViewModel          = savedInstanceState.getParcelable(PANEL_VIEW_MODEL);
+    }
+
     /* -----------------------------------------------------------------------------------------------------------------
-    * Open Camera helper
-    ----------------------------------------------------------------------------------------------------------------- */
+        * Open Camera helper
+        ----------------------------------------------------------------------------------------------------------------- */
     private void openCamera() {
+
+        // First check permission for camera and write external storage.
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
+                || ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.CAMERA}, WRITE_STORAGE_AND_CAMERA_PERMISSION_GRANTED_ID);
+            return;
+        }
+
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         // Ensure that there's a camera activity to handle the intent
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
@@ -260,14 +302,19 @@ public class CustomerEditActivity extends AppCompatActivity implements OnMapRead
                         getString(R.string.content_authority_for_file_provider),
                         photoFile);
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-                startActivityForResult(takePictureIntent, REQUEST_IMAGE_PHOTO);
+                startActivityForResult(takePictureIntent, REQUEST_IMAGE_PHOTO_FROM_CAMERA);
             }
         }
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_IMAGE_PHOTO && resultCode == RESULT_OK) refreshCustomerPhotoUI();
+        if (requestCode == REQUEST_IMAGE_PHOTO_FROM_CAMERA && resultCode == RESULT_OK) refreshCustomerPhotoUI();
+        if (requestCode == REQUEST_IMAGE_PHOTO_FROM_GALLERY && resultCode == RESULT_OK) {
+            mViewModel.customerPhotoPath = MediaUtils.getAttachedImagePath(this,data);
+            Timber.i("Attached photo path: " + mViewModel.customerPhotoPath);
+            refreshCustomerPhotoUI();
+        }
     }
 
 
@@ -283,6 +330,14 @@ public class CustomerEditActivity extends AppCompatActivity implements OnMapRead
         mBinding.locationLayout.inputCustomerAddressStreet.setText(mViewModel.customerAddressStreet);
         mBinding.locationLayout.inputCustomerAddressCity.setText(mViewModel.customerAddressCity);
         mBinding.locationLayout.inputCustomerAddressCountry.setText(mViewModel.customerAdressCountry);
+
+        int selectedPhoneTypePosition = 0;
+        try {
+            selectedPhoneTypePosition = Integer.parseInt(mViewModel.customerPhoneType);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        mBinding.phoneLayout.inputCustomerPhoneTypeSpinner.setSelection(selectedPhoneTypePosition);
 
         // Refreshing the Map.
         refreshMap();
@@ -307,10 +362,22 @@ public class CustomerEditActivity extends AppCompatActivity implements OnMapRead
         Timber.i("File path:" + mViewModel.customerPhotoPath);
         mBinding.photoLayout.addOrAttachPhotoContainer.setVisibility(View.GONE);
         mBinding.photoLayout.validPhotoContainer.setVisibility(View.VISIBLE);
-        Picasso.with(this)
+
+        // Set Picasso. With a listener to get a message when image failed to load.
+        Picasso.Builder builder = new Picasso.Builder(this);
+        builder.listener(new Picasso.Listener()
+        {
+            @Override
+            public void onImageLoadFailed(Picasso picasso, Uri uri, Exception exception)
+            {
+                exception.printStackTrace();
+            }
+        });
+        builder.build()
                 .load("file://" + mViewModel.customerPhotoPath)
                 .error(R.drawable.ic_material_error_gray)
                 .fit()
+                .centerInside()
                 .into(mBinding.photoLayout.inputCustomerPhotoImageView);
     }
 
@@ -383,14 +450,14 @@ public class CustomerEditActivity extends AppCompatActivity implements OnMapRead
     // Source: https://developer.android.com/training/permissions/requesting.html#java
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        switch (requestCode) {
-            case LOCATION_PERMISSION_GRANTED_ID: {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
-                    Toast.makeText(this,R.string.permission_granted_message,Toast.LENGTH_SHORT).show();
-                else
-                    Toast.makeText(this,R.string.permission_denied_message,Toast.LENGTH_SHORT).show();
-            }
+        if(requestCode == LOCATION_PERMISSION_GRANTED_ID
+                || requestCode == READ_EXTERNAL_STORAGE_PERMISSION_GRANTED_ID
+                || requestCode == WRITE_STORAGE_AND_CAMERA_PERMISSION_GRANTED_ID){
+            // If request is cancelled, the result arrays are empty.
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
+                Toast.makeText(this,R.string.permission_granted_message,Toast.LENGTH_SHORT).show();
+            else
+                Toast.makeText(this,R.string.permission_denied_message,Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -479,9 +546,22 @@ public class CustomerEditActivity extends AppCompatActivity implements OnMapRead
 
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int itemId = item.getItemId();
+
+        switch (itemId){
+            case android.R.id.home:
+                finish();
+                return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
     /* -----------------------------------------------------------------------------------------------------------------
-     * Save Customer Loader
-     -------------------------------------------------------------------------------------------------------------------*/
+         * Save Customer Loader
+         -------------------------------------------------------------------------------------------------------------------*/
     private LoaderManager.LoaderCallbacks<String> saveCustomerLoaderListener
             = new LoaderManager.LoaderCallbacks<String>(){
 

@@ -106,6 +106,8 @@ public class CustomerDetailHeaderFragment extends Fragment implements LoaderMana
                 Picasso.with(getActivity())
                         .load("file://" + viewModel.customerPhotoPath)
                         .error(R.drawable.ic_material_person_gray)
+                        .fit()
+                        .centerCrop()
                         .into(mBinding.customerPhotoBackgroundImageView);
             }
         }

@@ -61,6 +61,8 @@ public class CustomerListFragment extends Fragment implements LoaderManager.Load
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+
+        // Binding the view.
         mBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_customer_list, container, false);
 
 
@@ -70,11 +72,7 @@ public class CustomerListFragment extends Fragment implements LoaderManager.Load
         mBinding.customerListRecyclerView.setLayoutManager(layoutManager);
         mBinding.customerListRecyclerView.setAdapter(mAdapter);
 
-        // Recovering the textToSearch.
-        mTextToSearch = "";
-        if(savedInstanceState!=null && savedInstanceState.containsKey(TEXT_TO_SEARCH))
-            mTextToSearch = savedInstanceState.getString(TEXT_TO_SEARCH);
-
+        // Set action to "New customer" FAB.
         mBinding.actionNewCustomer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -88,7 +86,7 @@ public class CustomerListFragment extends Fragment implements LoaderManager.Load
     @Override
     public void onResume() {
         super.onResume();
-        searchCustomer(mTextToSearch);
+        searchCustomer(mBinding.searchText.getText().toString());
     }
 
     // Override onAttach to make sure that the container activity has implemented the callback
@@ -107,10 +105,8 @@ public class CustomerListFragment extends Fragment implements LoaderManager.Load
     }
 
     private void searchCustomer(String textToSearch){
-        mTextToSearch = textToSearch;
-
         Bundle searchBundle = new Bundle();
-        searchBundle.putString(TEXT_TO_SEARCH,mTextToSearch);
+        searchBundle.putString(TEXT_TO_SEARCH,textToSearch);
         getLoaderManager().restartLoader(LOADER_CUSTOMER_SEARCH_ID, searchBundle,this);
     }
 

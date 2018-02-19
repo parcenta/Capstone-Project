@@ -24,6 +24,9 @@
     <string name="attach_photo">Attach</string>
     <string name="take_photo">Take</string>
     <string name="or">or</string>
+    <string name="edit_customer">Edit customer</string>
+    <string name="new_customer">New customer</string>
+
 
     <string name="customer_created_successfully">Created successfully…</string>
     <string name="customer_name_is_required">Name is required.</string>
