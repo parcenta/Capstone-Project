@@ -44,6 +44,9 @@
             android:layout_marginStart="16dp"
             android:src="@drawable/ic_material_email_gray"
             android:contentDescription="@string/send_email"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?android:attr/selectableItemBackground"
             />
 
 

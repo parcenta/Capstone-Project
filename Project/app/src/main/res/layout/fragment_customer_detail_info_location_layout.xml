@@ -60,11 +60,15 @@
 
                 <!-- Navigate Button -->
                 <ImageView
+                    android:id="@+id/action_navigate_to_location"
                     style="@style/CustomerConnect.Form.SectionImage"
                     android:layout_marginStart="16dp"
                     android:layout_gravity="center_vertical"
                     android:src="@drawable/ic_material_navigate_gray"
                     android:contentDescription="@string/navigate"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:background="?android:attr/selectableItemBackground"
                     />
             </LinearLayout>
 
@@ -73,7 +77,8 @@
             <FrameLayout
                 android:id="@+id/customer_info_map_holder"
                 android:layout_width="match_parent"
-                android:layout_height="200dp"/>
+                android:layout_height="200dp"
+                android:layout_marginTop="8dp"/>
 
         </LinearLayout>
 

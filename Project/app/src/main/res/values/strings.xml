@@ -8,7 +8,7 @@
     <string name="add_new_customer">Add Customer</string>
     <string name="no_customers_found">No customers found</string>
     <string name="customer_search_hint">Search by name...</string>
-
+    <string name="unknown">Unknown</string>
 
     <string name="an_error_has_ocurred">An error has ocurred. Please try again.</string>
     <string name="permission_denied_message">Permission was denied. Permission must be granted to complete the desired task.</string>
@@ -49,10 +49,21 @@
     <string name="visit_created_successfully">Created successfully…</string>
     <string name="commentary_required">A commentary is required…</string>
 
+    <!-- Validation strings-->
+    <string name="no_image_path_is_found">Image is empty.</string>
+    <string name="phone_not_valid_for_phone_call">No phone number specified.</string>
+    <string name="email_not_valid_for_send_email">No email specified.</string>
+    <string name="no_coordinates_for_navigate">No GPS coordinates are specified.</string>
+
+
+    <!-- Address type -->
+    <string name="home_type">Home</string>
+    <string name="work_type">Work</string>
+    <string name="other_type">Other</string>
     <string-array name="phone_types_array">
-        <item>Home</item>
-        <item>Work</item>
-        <item>Other</item>
+        <item>@string/home_type</item>
+        <item>@string/work_type</item>
+        <item>@string/other_type</item>
     </string-array>
 
     <!-- TODO: Remove or change this placeholder text -->

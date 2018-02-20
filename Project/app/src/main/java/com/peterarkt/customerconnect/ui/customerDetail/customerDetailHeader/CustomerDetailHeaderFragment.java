@@ -12,6 +12,8 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +23,9 @@ import com.peterarkt.customerconnect.database.contracts.CustomerContract;
 import com.peterarkt.customerconnect.database.provider.CustomerDBUtils;
 import com.peterarkt.customerconnect.databinding.FragmentCustomerDetailHeaderBinding;
 import com.peterarkt.customerconnect.ui.customerDetail.CustomerDetailActivity;
+import com.peterarkt.customerconnect.ui.customerEdit.CustomerEditActivity;
+import com.peterarkt.customerconnect.ui.utils.Constants;
+import com.peterarkt.customerconnect.ui.utils.PhoneActionUtils;
 import com.squareup.picasso.Picasso;
 
 import timber.log.Timber;
@@ -64,11 +69,31 @@ public class CustomerDetailHeaderFragment extends Fragment implements LoaderMana
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        setHasOptionsMenu(true);
+
         Bundle receivedBundle = getArguments();
         if (receivedBundle.containsKey(CUSTOMER_ID)) mCustomerId = receivedBundle.getInt(CUSTOMER_ID);
 
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int itemId = item.getItemId();
+
+        switch (itemId){
+            case R.id.menu_edit_customer:
+                CustomerEditActivity.launch(getActivity(), Constants.UPDATE_MODE,mCustomerId);
+                return true;
+            case R.id.menu_zoom_customer_image:
+                if(mViewModel != null) PhoneActionUtils.openImage(getActivity(),mViewModel.customerPhotoPath);
+                return true;
+            case R.id.menu_delete_customer:
+
+                return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
 
     /* --------------------------------------
     * OnCreateView
@@ -94,23 +119,6 @@ public class CustomerDetailHeaderFragment extends Fragment implements LoaderMana
         super.onActivityCreated(savedInstanceState);
 
         getLoaderManager().initLoader(LOAD_CUSTOMER_INFO_FROM_CUSTOMER_DETAIL_HEADER,null,this);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int itemId = item.getItemId();
-
-        switch (itemId){
-            case R.id.menu_edit_customer:
-                return true;
-            case R.id.menu_zoom_customer_image:
-                return true;
-            case R.id.menu_delete_customer:
-
-                return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 
     /* --------------------------------------
