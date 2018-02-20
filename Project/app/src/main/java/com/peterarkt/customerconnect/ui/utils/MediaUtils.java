@@ -21,10 +21,6 @@ import java.util.concurrent.ExecutionException;
 
 import timber.log.Timber;
 
-/**
- * Created by USUARIO on 13/02/2018.
- */
-
 public class MediaUtils {
 
     /* ---------------------------------------------------------------------------------
@@ -77,12 +73,15 @@ public class MediaUtils {
         Cursor cursor = context.getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
                 column, sel, new String[]{ id }, null);
 
-        int columnIndex = cursor.getColumnIndex(column[0]);
+        if(cursor != null){
+            int columnIndex = cursor.getColumnIndex(column[0]);
 
-        if (cursor.moveToFirst()) {
-            filePath = cursor.getString(columnIndex);
+            if (cursor.moveToFirst()) {
+                filePath = cursor.getString(columnIndex);
+            }
+            cursor.close();
         }
-        cursor.close();
+
         return filePath;
     }
 

@@ -5,6 +5,7 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.databinding.DataBindingUtil;
 import android.location.Location;
 import android.net.Uri;
@@ -40,6 +41,8 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.jakewharton.rxbinding.widget.RxAdapterView;
 import com.jakewharton.rxbinding.widget.RxTextView;
 import com.peterarkt.customerconnect.R;
+import com.peterarkt.customerconnect.database.contracts.CustomerContract;
+import com.peterarkt.customerconnect.database.provider.CustomerDBUtils;
 import com.peterarkt.customerconnect.databinding.ActivityCustomerEditBinding;
 import com.peterarkt.customerconnect.ui.utils.Constants;
 import com.peterarkt.customerconnect.ui.utils.MediaUtils;
@@ -141,6 +144,11 @@ public class CustomerEditActivity extends AppCompatActivity implements OnMapRead
         if (customerIsSaving)
             getSupportLoaderManager().initLoader(SAVE_CUSTOMER_LOADER_ID, null, saveCustomerLoaderListener);
 
+        // ---------------------------------------------------------------------------------
+        // If it is UPD mode. Then initLoader to load the customer info.
+        // ---------------------------------------------------------------------------------
+        if(mPanelMode.equals(Constants.UPDATE_MODE))
+            getSupportLoaderManager().initLoader(LOAD_CUSTOMER_LOADER_ID,null,loadCustomerLoaderListener);
     }
 
     @Override
@@ -149,14 +157,15 @@ public class CustomerEditActivity extends AppCompatActivity implements OnMapRead
         Timber.i("OnResume");
         // Like the OnRestoreInstance is called before onResume (after OnStart) and also the OnRestoreInstance
         // recover the view model, then in this point we can use it and restore the inputs, etc.
+        // NOTE: For UPD Mode, we do this on onLoadFinished of its respective loader.
         // Source: https://developer.android.com/guide/components/activities/activity-lifecycle.html
-        setupUIFromViewModel();
-
+        if(mPanelMode.equals(Constants.INSERT_MODE))
+            setupUIFromViewModel();
     }
 
     private void setupUI(){
 
-        // Set Actionbar
+        // Set Toolbar
         mBinding.toolbar.setTitle(mPanelMode.equalsIgnoreCase(Constants.UPDATE_MODE) ? getString(R.string.edit_customer) : getString(R.string.new_customer));
         mBinding.toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
@@ -272,8 +281,8 @@ public class CustomerEditActivity extends AppCompatActivity implements OnMapRead
     }
 
     /* -----------------------------------------------------------------------------------------------------------------
-        * Open Camera helper
-        ----------------------------------------------------------------------------------------------------------------- */
+    * Open Camera helper
+    ----------------------------------------------------------------------------------------------------------------- */
     private void openCamera() {
 
         // First check permission for camera and write external storage.
@@ -449,7 +458,10 @@ public class CustomerEditActivity extends AppCompatActivity implements OnMapRead
         }
     }
 
+    // --------------------------------------------------------------------------------------
+    //  onRequestPermissionsResult
     // Source: https://developer.android.com/training/permissions/requesting.html#java
+    // --------------------------------------------------------------------------------------
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if(requestCode == LOCATION_PERMISSION_GRANTED_ID
@@ -471,7 +483,8 @@ public class CustomerEditActivity extends AppCompatActivity implements OnMapRead
     }
 
      /* -----------------------------------------------------------------------------------------------------------------
-     * Change listeners for ViewModel
+     * Changing listeners for ViewModel
+     * To mantain the viewMode as updated as possible.
      -------------------------------------------------------------------------------------------------------------------*/
     private void setChangeListenersForViewModel(){
 
@@ -561,39 +574,98 @@ public class CustomerEditActivity extends AppCompatActivity implements OnMapRead
         return super.onOptionsItemSelected(item);
     }
 
-    /* -----------------------------------------------------------------------------------------------------------------
-         * Save Customer Loader
-         -------------------------------------------------------------------------------------------------------------------*/
+
+
+
+
+    /*-----------------------------------------------------------------------------------------------------------------
+    -----------------------------------------------------------------------------------------------------------------
+     * LOADING CUSTOMER (for UPD Mode)
+     -------------------------------------------------------------------------------------------------------------------
+     -----------------------------------------------------------------------------------------------------------------*/
+    private LoaderManager.LoaderCallbacks<CustomerEditViewModel> loadCustomerLoaderListener
+            = new LoaderManager.LoaderCallbacks<CustomerEditViewModel>(){
+
+        @Override
+        public Loader<CustomerEditViewModel> onCreateLoader(int id, Bundle args) {
+            return new LoadCustomerAsyncTaskLoader(CustomerEditActivity.this,mCustomerId);
+        }
+
+        @Override
+        public void onLoadFinished(Loader<CustomerEditViewModel> loader, CustomerEditViewModel viewModelFromDB) {
+            Timber.i("LoadCustomerLoader: onLoadFinished is called.");
+
+
+            // If something happened when
+            if(viewModelFromDB == null){
+                Toast.makeText(CustomerEditActivity.this,R.string.customer_not_found,Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // If there is NOT a recovered viewModel from SavedInstance,then overwrite the one from this loader.
+            // When it loads the first, it will always enter here.
+            if(mViewModel.customerId == 0) mViewModel = viewModelFromDB;
+
+            // Now set the UI with the values in ViewModel.
+            setupUIFromViewModel();
+        }
+
+        @Override
+        public void onLoaderReset(Loader<CustomerEditViewModel> loader) {
+        }
+    };
+
+
+    // LOAD Customer AsyncTaskLoader.
+    private static class LoadCustomerAsyncTaskLoader extends AsyncTaskLoader<CustomerEditViewModel>{
+
+        private int customerId;
+
+        CustomerEditViewModel cachedModelFromDB;
+
+        @Override
+        protected void onStartLoading() {
+            super.onStartLoading();
+            if(cachedModelFromDB!=null)
+                deliverResult(cachedModelFromDB);
+            else
+                forceLoad();
+        }
+
+        LoadCustomerAsyncTaskLoader(Context context, int customerId) {
+            super(context);
+            this.customerId = customerId;
+        }
+
+        @Override
+        public CustomerEditViewModel loadInBackground() {
+            return CustomerEditHelper.getCustomerRecordAsViewModel(getContext(),customerId);
+        }
+
+        @Override
+        public void deliverResult(CustomerEditViewModel data) {
+            cachedModelFromDB = data;
+            super.deliverResult(cachedModelFromDB);
+        }
+    }
+
+
+
+
+
+
+
+    /*-----------------------------------------------------------------------------------------------------------------
+    -----------------------------------------------------------------------------------------------------------------
+     * SAVE CUSTOMER LOADER (For UPD and INS Mode)
+     -------------------------------------------------------------------------------------------------------------------
+     -----------------------------------------------------------------------------------------------------------------*/
     private LoaderManager.LoaderCallbacks<String> saveCustomerLoaderListener
             = new LoaderManager.LoaderCallbacks<String>(){
 
         @Override
         public Loader<String> onCreateLoader(int id, Bundle args) {
-            return new AsyncTaskLoader<String>(CustomerEditActivity.this) {
-
-                String cachedErrorMessage;
-
-                @Override
-                protected void onStartLoading() {
-                    super.onStartLoading();
-                    if(cachedErrorMessage!=null)
-                        deliverResult(cachedErrorMessage);
-                    else
-                        forceLoad();
-                }
-
-                @Override
-                public String loadInBackground() {
-                    if(mViewModel == null) return "An error has ocurred. Please try again.";
-                    return CustomerEditHelper.createCustomer(CustomerEditActivity.this,mViewModel);
-                }
-
-                @Override
-                public void deliverResult(String errorMessage) {
-                    cachedErrorMessage = errorMessage;
-                    super.deliverResult(cachedErrorMessage);
-                }
-            };
+            return new SaveCustomerAsyncTaskLoader(CustomerEditActivity.this,mCustomerId,mPanelMode,mViewModel);
         }
 
         @Override
@@ -615,4 +687,45 @@ public class CustomerEditActivity extends AppCompatActivity implements OnMapRead
         public void onLoaderReset(Loader<String> loader) {
         }
     };
+
+
+    // SAVE Customer AsyncTaskLoader.
+    private static class SaveCustomerAsyncTaskLoader extends AsyncTaskLoader<String>{
+
+        private int customerId;
+        private String panelMode;
+        private CustomerEditViewModel viewModelToBeSaved;
+
+        String cachedErrorMessage;
+
+        @Override
+        protected void onStartLoading() {
+            super.onStartLoading();
+            if(cachedErrorMessage!=null)
+                deliverResult(cachedErrorMessage);
+            else
+                forceLoad();
+        }
+
+        SaveCustomerAsyncTaskLoader(Context context, int customerId, String panelMode, CustomerEditViewModel viewModelToBeSaved) {
+            super(context);
+            this.customerId = customerId;
+            this.panelMode  = panelMode;
+            this.viewModelToBeSaved = viewModelToBeSaved;
+        }
+
+        @Override
+        public String loadInBackground() {
+            if(viewModelToBeSaved == null) return "An error has ocurred. Please try again.";
+
+            // Try to Insert or Update (depending in the panel mode) the customer.
+            return CustomerEditHelper.createOrUpdateCustomer(getContext(),viewModelToBeSaved,panelMode,customerId);
+        }
+
+        @Override
+        public void deliverResult(String errorMessage) {
+            cachedErrorMessage = errorMessage;
+            super.deliverResult(cachedErrorMessage);
+        }
+    }
 }

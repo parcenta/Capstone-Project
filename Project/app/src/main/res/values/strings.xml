@@ -29,6 +29,7 @@
     <string name="zoom_customer_photo">Zoom image</string>
     <string name="new_customer">New customer</string>
     <string name="delete_customer">Delete customer</string>
+    <string name="customer_not_found">Customer not found or something happens. Please try again.</string>
 
 
     <string name="customer_created_successfully">Created successfully…</string>
