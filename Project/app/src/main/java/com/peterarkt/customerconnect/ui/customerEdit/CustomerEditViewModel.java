@@ -25,7 +25,7 @@ public class CustomerEditViewModel implements Parcelable{
         this.customerId                  = 0;
         this.customerName                = "";
         this.customerPhoneNumber         = "";
-        this.customerPhoneType           = "";
+        this.customerPhoneType           = "0";
         this.customerEmail               = "";
         this.customerAddressStreet       = "";
         this.customerAddressCity         = "";

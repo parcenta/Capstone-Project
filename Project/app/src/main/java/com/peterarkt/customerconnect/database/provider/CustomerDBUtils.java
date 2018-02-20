@@ -10,6 +10,8 @@ import com.peterarkt.customerconnect.database.contracts.CustomerContract;
 import com.peterarkt.customerconnect.database.contracts.VisitContract;
 import com.peterarkt.customerconnect.ui.customerEdit.CustomerEditViewModel;
 
+import timber.log.Timber;
+
 
 public class CustomerDBUtils {
 
@@ -84,5 +86,26 @@ public class CustomerDBUtils {
         Uri insertUri = context.getContentResolver().insert(CustomerContract.CustomerEntry.CONTENT_URI,cv);
         long newId = ContentUris.parseId(insertUri);
         return newId > 0;
+    }
+
+    // Method to insert Customer (from the Customer view mdoel in CustomerEditActivity).
+    public static boolean deleteCustomerAndVisits(Context context, int customerId){
+        // Create the Content Values.
+        if(context == null) return false;
+
+        // First delete all the visits for the specified customer.
+        int deletedVisitsRows = context.getContentResolver().delete(VisitContract.VisitEntry.CONTENT_URI,
+                                            VisitContract.VisitEntry.COLUMN_CUSTOMER_ID + " = ?",
+                                            new String[]{String.valueOf(customerId)});
+        Timber.d("Deleted Visits: " + deletedVisitsRows);
+
+
+
+        // Now delete the Customer.
+        int deletedCustomerRows = context.getContentResolver().delete(CustomerContract.CustomerEntry.CONTENT_URI,
+                CustomerContract.CustomerEntry._ID + " = ?",
+                new String[]{String.valueOf(customerId)});
+
+        return deletedCustomerRows > 0;
     }
 }

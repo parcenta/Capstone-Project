@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="fab_margin">24dp</dimen>
+
+    <dimen name="customer_edit_activity_container_width">500sp</dimen>
+    <dimen name="customer_edit_activity_container_margin">16dp</dimen>
 </resources>

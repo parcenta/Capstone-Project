@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.database.Cursor;
 import android.databinding.DataBindingUtil;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -17,11 +18,13 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.peterarkt.customerconnect.R;
 import com.peterarkt.customerconnect.database.contracts.CustomerContract;
 import com.peterarkt.customerconnect.database.provider.CustomerDBUtils;
 import com.peterarkt.customerconnect.databinding.FragmentCustomerDetailHeaderBinding;
+import com.peterarkt.customerconnect.ui.CustomerConnectMainActivity;
 import com.peterarkt.customerconnect.ui.customerDetail.CustomerDetailActivity;
 import com.peterarkt.customerconnect.ui.customerEdit.CustomerEditActivity;
 import com.peterarkt.customerconnect.ui.utils.Constants;
@@ -102,12 +105,6 @@ public class CustomerDetailHeaderFragment extends Fragment implements LoaderMana
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         mBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_customer_detail_header, container, false);
-
-        Activity parentActivity = getActivity();
-        if(parentActivity instanceof CustomerDetailActivity)
-            ((CustomerDetailActivity) parentActivity).setToolbarInActivity(mBinding.toolbar);
-
-
         return mBinding.getRoot();
     }
 
@@ -117,13 +114,18 @@ public class CustomerDetailHeaderFragment extends Fragment implements LoaderMana
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-
         getLoaderManager().initLoader(LOAD_CUSTOMER_INFO_FROM_CUSTOMER_DETAIL_HEADER,null,this);
     }
 
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.customer_detail_menu, menu);
+        super.onCreateOptionsMenu(menu,inflater);
+    }
+
     /* --------------------------------------
-            * Loader methods
-            * --------------------------------------*/
+    * Loader methods
+    * --------------------------------------*/
     @Override
     public Loader<CustomerDetailHeaderViewModel> onCreateLoader(int i, Bundle bundle) {
         return new CustomerDetailHeaderAsyncTaskLoader(getActivity(),mCustomerId);

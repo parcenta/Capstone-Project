@@ -30,6 +30,8 @@
     <string name="new_customer">New customer</string>
     <string name="delete_customer">Delete customer</string>
     <string name="customer_not_found">Customer not found or something happens. Please try again.</string>
+    <string name="customer_deleted_successfully">Customer deleted successfully.</string>
+    <string name="ask_customer_to_be_deleted">The customer and his visits will be deleted. Do you want to continue?</string>
 
 
     <string name="customer_created_successfully">Created successfully…</string>

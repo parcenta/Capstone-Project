@@ -10,4 +10,10 @@
     <dimen name="fab_resting_elevation">6dp</dimen>
     <dimen name="card_view_resting_elevation">2dp</dimen>
     <dimen name="app_bar_elevation">4dp</dimen>
+
+    <!-- Force match_parent Source: https://stackoverflow.com/questions/16478808/value-equals-to-match-parent-or-fill-parent-in-dimens-xml-->
+    <dimen name="customer_edit_activity_container_width">-1px</dimen>
+
+
+    <dimen name="customer_edit_activity_container_margin">0dp</dimen>
 </resources>

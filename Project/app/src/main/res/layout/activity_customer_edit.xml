@@ -11,6 +11,7 @@
         android:layout_height="match_parent"
         android:fitsSystemWindows="true">
 
+
             <android.support.v7.widget.Toolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
@@ -36,43 +37,51 @@
                 android:layout_height="match_parent"
                 android:layout_marginTop="?actionBarSize">
 
-                <LinearLayout
-                    android:layout_width="match_parent"
+                <android.support.v7.widget.CardView
+                    android:layout_width="@dimen/customer_edit_activity_container_width"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical">
+                    android:orientation="vertical"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_margin="@dimen/customer_edit_activity_container_margin">
 
-                    <!-- Basic Info (Name) -->
-                    <include
-                        android:id="@+id/basic_info_layout"
-                        layout="@layout/activity_customer_edit_basic_info_inputs"/>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        android:paddingBottom="50dp">
 
-
-                    <!-- Phone Info -->
-                    <include
-                        android:id="@+id/phone_layout"
-                        layout="@layout/activity_customer_edit_phone_inputs"/>
-
-
-                    <!-- Email Info -->
-                    <include
-                        android:id="@+id/email_layout"
-                        layout="@layout/activity_customer_edit_email_inputs"/>
+                        <!-- Basic Info (Name) -->
+                        <include
+                            android:id="@+id/basic_info_layout"
+                            layout="@layout/activity_customer_edit_basic_info_inputs"/>
 
 
-                    <!-- Location Info -->
-                    <include
-                        android:id="@+id/location_layout"
-                        layout="@layout/activity_customer_edit_location_inputs"/>
+                        <!-- Phone Info -->
+                        <include
+                            android:id="@+id/phone_layout"
+                            layout="@layout/activity_customer_edit_phone_inputs"/>
 
 
-                    <!-- Photo Info -->
-                    <include
-                        android:id="@+id/photo_layout"
-                        layout="@layout/activity_customer_edit_photo_inputs"/>
+                        <!-- Email Info -->
+                        <include
+                            android:id="@+id/email_layout"
+                            layout="@layout/activity_customer_edit_email_inputs"/>
 
 
+                        <!-- Location Info -->
+                        <include
+                            android:id="@+id/location_layout"
+                            layout="@layout/activity_customer_edit_location_inputs"/>
 
-                </LinearLayout>
+
+                        <!-- Photo Info -->
+                        <include
+                            android:id="@+id/photo_layout"
+                            layout="@layout/activity_customer_edit_photo_inputs"/>
+
+                    </LinearLayout>
+
+                </android.support.v7.widget.CardView>
             </ScrollView>
 
 

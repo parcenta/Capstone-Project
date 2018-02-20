@@ -14,6 +14,7 @@ import android.support.annotation.Nullable;
 import com.peterarkt.customerconnect.database.CustomerConnectDBHelper;
 import com.peterarkt.customerconnect.database.contracts.CustomerContract;
 import com.peterarkt.customerconnect.database.contracts.VisitContract;
+import com.peterarkt.customerconnect.ui.customerDetail.customerDetailVisits.CustomerVisit;
 
 import java.util.Timer;
 
@@ -134,8 +135,36 @@ public class CustomerConnectProvider extends ContentProvider {
     }
 
     @Override
-    public int delete(@NonNull Uri uri, @Nullable String s, @Nullable String[] strings) {
-        return 0;
+    public int delete(@NonNull Uri uri, @Nullable String selection, @Nullable String[] selectionArgs) {
+
+        int rowsDeleted;
+
+        switch (sUriMatcher.match(uri)) {
+
+            case CODE_CUSTOMER:
+
+                rowsDeleted = mDbHelper.getWritableDatabase().delete(
+                        CustomerContract.CustomerEntry.TABLE_NAME,
+                        selection,
+                        selectionArgs);
+                break;
+
+            case CODE_VISIT:
+
+                rowsDeleted = mDbHelper.getWritableDatabase().delete(
+                        VisitContract.VisitEntry.TABLE_NAME,
+                        selection,
+                        selectionArgs);
+                break;
+
+            default:
+                throw new UnsupportedOperationException("Unknown uri: " + uri);
+        }
+
+        if (rowsDeleted != 0)
+            getContext().getContentResolver().notifyChange(uri, null);
+
+        return rowsDeleted;
     }
 
     @Override

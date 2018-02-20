@@ -7,16 +7,6 @@
         android:layout_height="match_parent"
         tools:context="com.peterarkt.customerconnect.ui.customerDetail.customerDetailHeader.CustomerDetailHeaderFragment">
 
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?actionBarSize"
-            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-            app:navigationIcon="@drawable/ic_material_back_white_with_shadow"
-            android:elevation="4dp"
-            app:title=" "
-            />
-
         <ImageView
             android:id="@+id/customer_photo_background_image_view"
             android:layout_width="match_parent"
