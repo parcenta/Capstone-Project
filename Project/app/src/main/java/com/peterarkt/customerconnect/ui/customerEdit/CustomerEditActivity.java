@@ -676,7 +676,7 @@ public class CustomerEditActivity extends AppCompatActivity implements OnMapRead
 
             // if everything is fine...
             if(errorMessage != null && errorMessage.isEmpty()){
-                Toast.makeText(CustomerEditActivity.this,getString(R.string.customer_created_successfully),Toast.LENGTH_SHORT).show();
+                Toast.makeText(CustomerEditActivity.this,getString(mPanelMode.equals(Constants.UPDATE_MODE) ? R.string.customer_updated_successfully : R.string.customer_created_successfully),Toast.LENGTH_SHORT).show();
                 finish();
             } //... if something fails...
             else

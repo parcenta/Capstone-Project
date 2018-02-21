@@ -8,6 +8,7 @@ import com.peterarkt.customerconnect.R;
 import com.peterarkt.customerconnect.database.contracts.CustomerContract;
 import com.peterarkt.customerconnect.database.provider.CustomerDBUtils;
 import com.peterarkt.customerconnect.ui.utils.Constants;
+import com.peterarkt.customerconnect.ui.utils.ValidationUtils;
 
 /**
  * Created by Andrés on 2/6/18.
@@ -33,6 +34,14 @@ public class CustomerEditHelper {
         // Customer Address Street validation
         if(customer.customerAddressStreet.isEmpty())
             return context.getString(R.string.customer_address_street_is_required);
+
+        // Customer Address email
+        if(customer.customerEmail.length() > 0 && !ValidationUtils.emailIsValid(customer.customerEmail))
+            return context.getString(R.string.email_is_not_valid);
+
+        // Validate Phone number. Must be only numbers.
+        if(customer.customerPhoneNumber.length() > 0 && !ValidationUtils.phoneNumberIsValid(customer.customerPhoneNumber))
+            return context.getString(R.string.phone_number_is_not_valid);
 
 
         try {
