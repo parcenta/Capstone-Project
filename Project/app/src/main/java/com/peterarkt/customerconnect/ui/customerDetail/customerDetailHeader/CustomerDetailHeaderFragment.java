@@ -127,13 +127,14 @@ public class CustomerDetailHeaderFragment extends Fragment implements LoaderMana
     }
 
     /* --------------------------------------
-    * OnCreateView
+    * OnResume
     * --------------------------------------*/
     @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        getLoaderManager().initLoader(LOAD_CUSTOMER_INFO_FROM_CUSTOMER_DETAIL_HEADER,null,this);
+    public void onResume() {
+        super.onResume();
+        getLoaderManager().restartLoader(LOAD_CUSTOMER_INFO_FROM_CUSTOMER_DETAIL_HEADER,null,this);
     }
+
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {

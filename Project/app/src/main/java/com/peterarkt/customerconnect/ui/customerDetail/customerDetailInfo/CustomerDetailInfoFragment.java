@@ -120,14 +120,15 @@ public class CustomerDetailInfoFragment extends Fragment  implements LoaderManag
     }
 
     @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        getLoaderManager().initLoader(LOAD_CUSTOMER_INFO_FROM_CUSTOMER_DETAIL_INFO,null,this);
+    public void onResume() {
+        super.onResume();
+        // We restart to show any changes if the customer was updated or not.
+        getLoaderManager().restartLoader(LOAD_CUSTOMER_INFO_FROM_CUSTOMER_DETAIL_INFO,null,this);
     }
 
     /* ------------------------------------------------------
-        *   Loader Methods
-        * ------------------------------------------------------*/
+            *   Loader Methods
+            * ------------------------------------------------------*/
     @Override
     public Loader<CustomerDetailInfoViewModel> onCreateLoader(int id, Bundle args) {
         return new CustomerDetailInfoAsyncTaskLoader(getActivity(),mCustomerId);

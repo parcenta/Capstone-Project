@@ -69,7 +69,7 @@ public class CustomerDBUtils {
         if(cv == null || context == null) return false;
 
         // Set the Selection.
-        String selection = VisitContract.VisitEntry.COLUMN_CUSTOMER_ID + " = ?";
+        String selection = CustomerContract.CustomerEntry._ID + " = ?";
         String[] selectionArgs = new String[]{String.valueOf(customerId)};
 
         // Update the Customer.

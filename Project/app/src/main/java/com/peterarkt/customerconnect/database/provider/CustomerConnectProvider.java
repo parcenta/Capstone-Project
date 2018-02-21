@@ -168,7 +168,36 @@ public class CustomerConnectProvider extends ContentProvider {
     }
 
     @Override
-    public int update(@NonNull Uri uri, @Nullable ContentValues contentValues, @Nullable String s, @Nullable String[] strings) {
-        return 0;
+    public int update(@NonNull Uri uri, @Nullable ContentValues cv, @Nullable String selection, @Nullable String[] selectionArgs) {
+        int rowsUpdated;
+
+        switch (sUriMatcher.match(uri)) {
+
+            case CODE_CUSTOMER:
+
+                rowsUpdated = mDbHelper.getWritableDatabase().update(
+                        CustomerContract.CustomerEntry.TABLE_NAME,
+                        cv,
+                        selection,
+                        selectionArgs);
+                break;
+
+            case CODE_VISIT:
+
+                rowsUpdated = mDbHelper.getWritableDatabase().update(
+                        VisitContract.VisitEntry.TABLE_NAME,
+                        cv,
+                        selection,
+                        selectionArgs);
+                break;
+
+            default:
+                throw new UnsupportedOperationException("Unknown uri: " + uri);
+        }
+
+        if (rowsUpdated != 0)
+            getContext().getContentResolver().notifyChange(uri, null);
+
+        return rowsUpdated;
     }
 }
