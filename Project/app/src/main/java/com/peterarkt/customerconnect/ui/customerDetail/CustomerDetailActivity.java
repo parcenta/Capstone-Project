@@ -1,15 +1,21 @@
 package com.peterarkt.customerconnect.ui.customerDetail;
 
+import android.app.Activity;
+import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.AsyncTask;
 import android.support.design.widget.TabLayout;
+import android.support.graphics.drawable.AnimationUtilsCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.transition.Slide;
+import android.view.Gravity;
 import android.view.View;
+import android.view.animation.AnimationUtils;
 import android.widget.Toast;
 
 import com.peterarkt.customerconnect.R;
@@ -36,8 +42,13 @@ public class CustomerDetailActivity extends AppCompatActivity implements Custome
     /* -----------------------------------------------------------------
      * Launch Helper
      * -----------------------------------------------------------------*/
-    public static void launch(Context context, int customerId) {
-        context.startActivity(launchIntent(context, customerId));
+    public static void launch(Activity calledFromActivity, int customerId) {
+
+        // Set enter transition.
+        Bundle bundle = ActivityOptions.makeSceneTransitionAnimation(calledFromActivity).toBundle();
+
+        //
+        calledFromActivity.startActivity(launchIntent(calledFromActivity, customerId), bundle);
     }
 
     private static Intent launchIntent(Context context, int customerId) {
@@ -55,6 +66,12 @@ public class CustomerDetailActivity extends AppCompatActivity implements Custome
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mBinding = DataBindingUtil.setContentView(this,R.layout.activity_customer_detail);
+
+        // Enter Transition.
+        Slide slide = new Slide(Gravity.END);
+        slide.setDuration(300);
+        slide.setInterpolator(AnimationUtils.loadInterpolator(this, android.R.interpolator.fast_out_slow_in));
+        getWindow().setEnterTransition(slide);
 
         // Set toolbar.
         setSupportActionBar(mBinding.toolbar);

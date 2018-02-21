@@ -16,4 +16,6 @@
 
 
     <dimen name="customer_edit_activity_container_margin">0dp</dimen>
+
+    <integer name="vertical_enter_transition_animation">400</integer>
 </resources>

@@ -10,6 +10,8 @@ import com.peterarkt.customerconnect.database.provider.CustomerDBUtils;
 import com.peterarkt.customerconnect.ui.utils.Constants;
 import com.peterarkt.customerconnect.ui.utils.ValidationUtils;
 
+import timber.log.Timber;
+
 /**
  * Created by Andrés on 2/6/18.
  */

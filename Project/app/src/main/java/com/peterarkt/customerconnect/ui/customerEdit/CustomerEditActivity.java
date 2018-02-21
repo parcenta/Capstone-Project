@@ -2,6 +2,8 @@ package com.peterarkt.customerconnect.ui.customerEdit;
 
 
 import android.Manifest;
+import android.app.Activity;
+import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -22,8 +24,11 @@ import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.transition.Slide;
+import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.AnimationUtils;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
@@ -101,8 +106,13 @@ public class CustomerEditActivity extends AppCompatActivity implements OnMapRead
     /* -----------------------------------------------------------------
      * Launch Helper
      * -----------------------------------------------------------------*/
-    public static void launch(Context context, String panelMode, int customerId) {
-        context.startActivity(launchIntent(context, panelMode, customerId));
+    public static void launch(Activity calledFromActivity, String panelMode, int customerId) {
+
+        // Set scene transition.
+        Bundle bundle = ActivityOptions.makeSceneTransitionAnimation(calledFromActivity).toBundle();
+
+        //
+        calledFromActivity.startActivity(launchIntent(calledFromActivity, panelMode, customerId), bundle);
     }
 
     private static Intent launchIntent(Context context, String panelMode, int customerId) {
@@ -121,7 +131,13 @@ public class CustomerEditActivity extends AppCompatActivity implements OnMapRead
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Timber.i("OnCreate");
+        Timber.d("OnCreate");
+
+        // Enter Transition. (From bottom to top)
+        Slide slide = new Slide(Gravity.BOTTOM);
+        slide.setDuration(getResources().getInteger(R.integer.vertical_enter_transition_animation));
+        slide.setInterpolator(AnimationUtils.loadInterpolator(this, android.R.interpolator.fast_out_slow_in));
+        getWindow().setEnterTransition(slide);
 
         // Binding the view.
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_customer_edit);
@@ -134,33 +150,40 @@ public class CustomerEditActivity extends AppCompatActivity implements OnMapRead
         Intent receivedIntent = getIntent();
         mPanelMode  = receivedIntent.hasExtra(PANEL_MODE) ? receivedIntent.getStringExtra(PANEL_MODE) : "";
         mCustomerId = receivedIntent.hasExtra(CUSTOMER_ID) ? receivedIntent.getIntExtra(CUSTOMER_ID, 0) : 0;
+        Timber.d("Starting CustomerEditActivity in " +mPanelMode + " mode...");
 
         // Set action bar, onclick listeners, text changes listener, etc.
         setupUI();
 
         // ---------------------------------------------------------------------------------
-        // If customer was saving (Remembered we recovered the value in onRestoreInstance)
+        // If customer was saving (Remembered we recovered that flag in onRestoreInstance)
         // ---------------------------------------------------------------------------------
-        if (customerIsSaving)
+        if (customerIsSaving) {
+            Timber.d("Customer was saving. Initiating loader.");
             getSupportLoaderManager().initLoader(SAVE_CUSTOMER_LOADER_ID, null, saveCustomerLoaderListener);
+        }
 
         // ---------------------------------------------------------------------------------
         // If it is UPD mode. Then initLoader to load the customer info.
         // ---------------------------------------------------------------------------------
-        if(mPanelMode.equals(Constants.UPDATE_MODE))
-            getSupportLoaderManager().initLoader(LOAD_CUSTOMER_LOADER_ID,null,loadCustomerLoaderListener);
+        if(mPanelMode.equals(Constants.UPDATE_MODE)) {
+            Timber.d("UPD MODE (OnCreate): Refreshing UI from recovered ViewModel (from restoreInstance)...");
+            getSupportLoaderManager().initLoader(LOAD_CUSTOMER_LOADER_ID, null, loadCustomerLoaderListener);
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        Timber.i("OnResume");
+        Timber.i("OnResume.");
         // Like the OnRestoreInstance is called before onResume (after OnStart) and also the OnRestoreInstance
         // recover the view model, then in this point we can use it and restore the inputs, etc.
         // NOTE: For UPD Mode, we do this on onLoadFinished of its respective loader.
         // Source: https://developer.android.com/guide/components/activities/activity-lifecycle.html
-        if(mPanelMode.equals(Constants.INSERT_MODE))
+        if(mPanelMode.equals(Constants.INSERT_MODE)){
+            Timber.d("OnResume in INS MODE: Refreshing UI from recovered ViewModel (from restoreInstance)...");
             setupUIFromViewModel();
+        }
     }
 
     private void setupUI(){
@@ -187,6 +210,7 @@ public class CustomerEditActivity extends AppCompatActivity implements OnMapRead
         // Set the Map Fragment (Loading the Map fragment this way, avoid that it delays the first time that it opens)
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map_fragment);
         if (mapFragment == null) {
+            Timber.d("MAP: Committing Map Fragment on view...");
             FragmentManager fm = getSupportFragmentManager();
             mapFragment = new SupportMapFragment();
             FragmentTransaction ft = fm.beginTransaction();
@@ -200,12 +224,14 @@ public class CustomerEditActivity extends AppCompatActivity implements OnMapRead
         mBinding.photoLayout.actionTakePhoto.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Timber.d("User Action: Opening camera...");
                 openCamera();
             }
         });
         mBinding.photoLayout.actionAttachPhoto.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Timber.d("User Action: Attaching photo...");
                 MediaUtils.launchAttachImageForGallery(CustomerEditActivity.this,READ_EXTERNAL_STORAGE_PERMISSION_GRANTED_ID,REQUEST_IMAGE_PHOTO_FROM_GALLERY);
             }
         });
@@ -214,6 +240,7 @@ public class CustomerEditActivity extends AppCompatActivity implements OnMapRead
         mBinding.actionSaveCustomer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Timber.d("User Action: Save Customer...");
                 customerIsSaving = true;
                 getSupportLoaderManager().restartLoader(SAVE_CUSTOMER_LOADER_ID, null, saveCustomerLoaderListener);
             }
@@ -223,6 +250,7 @@ public class CustomerEditActivity extends AppCompatActivity implements OnMapRead
         mBinding.photoLayout.actionDeleteCustomerPhoto.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Timber.d("User Action: Blank Customer photo...");
                 mViewModel.customerPhotoPath = "";
                 refreshCustomerPhotoUI();
             }
@@ -232,6 +260,7 @@ public class CustomerEditActivity extends AppCompatActivity implements OnMapRead
         mBinding.locationLayout.actionSearchCurrentLocation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Timber.d("User Action: Get Current location...");
                 getCurrentLocation();
             }
         });
@@ -255,10 +284,12 @@ public class CustomerEditActivity extends AppCompatActivity implements OnMapRead
 
         // If there is a valid Latitude and Longitude, then show the marker in that position.
         if (mViewModel.customerAddressLatitude != 0.00 || mViewModel.customerAddressLongitude != 0.00) {
+            Timber.d("MAP: Showing Marker at coordinates (LAT:" +mViewModel.customerAddressLatitude + ", LON:" + mViewModel.customerAddressLongitude+")");
             LatLng coordinates = new LatLng(mViewModel.customerAddressLatitude, mViewModel.customerAddressLongitude);
             mMap.addMarker(new MarkerOptions().position(coordinates).title("Current Position"));
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(coordinates, 16));
-        }
+        }else
+            Timber.d("MAP: No marker to show, because there are no coordinates...");
     }
 
     /* -----------------------------------------------------------------------------------------------------------------
@@ -320,11 +351,25 @@ public class CustomerEditActivity extends AppCompatActivity implements OnMapRead
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_IMAGE_PHOTO_FROM_CAMERA && resultCode == RESULT_OK) refreshCustomerPhotoUI();
-        if (requestCode == REQUEST_IMAGE_PHOTO_FROM_GALLERY && resultCode == RESULT_OK) {
-            mViewModel.customerPhotoPath = MediaUtils.getAttachedImagePath(this,data);
-            Timber.i("Attached photo path: " + mViewModel.customerPhotoPath);
-            refreshCustomerPhotoUI();
+
+        switch (requestCode){
+            // Camera
+            case REQUEST_IMAGE_PHOTO_FROM_CAMERA:
+                // If Picture was taken correctly, then show it in the panel.
+                if(resultCode == RESULT_OK)
+                    refreshCustomerPhotoUI();
+                else{ // If something fails, then set the path as empty.
+                    if(mViewModel!=null) mViewModel.customerPhotoPath = "";
+                }
+                return;
+
+            // Attached Photo
+            case REQUEST_IMAGE_PHOTO_FROM_GALLERY:
+                if(resultCode == RESULT_OK){
+                    mViewModel.customerPhotoPath = MediaUtils.getAttachedImagePath(this,data);
+                    Timber.d("Attached photo path: " + mViewModel.customerPhotoPath);
+                    refreshCustomerPhotoUI();
+                }
         }
     }
 
@@ -363,14 +408,14 @@ public class CustomerEditActivity extends AppCompatActivity implements OnMapRead
 
         // If Photo Path is empty, then show the Attach or Add buttons.
         if (mViewModel.customerPhotoPath.isEmpty()) {
-            Timber.i("File path is empty...");
+            Timber.d("Image path is empty...");
             mBinding.photoLayout.validPhotoContainer.setVisibility(View.GONE);
             mBinding.photoLayout.addOrAttachPhotoContainer.setVisibility(View.VISIBLE);
             return;
         }
 
         // If Photo Path is valid...
-        Timber.i("File path:" + mViewModel.customerPhotoPath);
+        Timber.d("Image path is valid. File path:" + mViewModel.customerPhotoPath);
         mBinding.photoLayout.addOrAttachPhotoContainer.setVisibility(View.GONE);
         mBinding.photoLayout.validPhotoContainer.setVisibility(View.VISIBLE);
 
@@ -381,6 +426,7 @@ public class CustomerEditActivity extends AppCompatActivity implements OnMapRead
             @Override
             public void onImageLoadFailed(Picasso picasso, Uri uri, Exception exception)
             {
+                Timber.d("Picasso could NOT load image in imageview. Photo path: " + mViewModel.customerPhotoPath + ". Showing stacktrace up next:");
                 exception.printStackTrace();
             }
         });
@@ -400,9 +446,12 @@ public class CustomerEditActivity extends AppCompatActivity implements OnMapRead
         // First check if LOCATION permission is enabled. If not then ask for it.
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 || ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            Timber.d("Location Permissions are not granted. Asking for them...");
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_GRANTED_ID);
             return;
         }
+
+        Timber.d("Getting current location...");
 
         // Show Progress bar.
         mBinding.locationLayout.actionSearchCurrentLocation.setVisibility(View.GONE);
@@ -447,6 +496,7 @@ public class CustomerEditActivity extends AppCompatActivity implements OnMapRead
 
     private void stopLocationUpdates(){
         try {
+            Timber.d("Stopping location updates...");
             if (mFusedLocationClient!= null) mFusedLocationClient.removeLocationUpdates(mLocationCallback);
 
             // Hide Progress bar.
@@ -467,18 +517,32 @@ public class CustomerEditActivity extends AppCompatActivity implements OnMapRead
         if(requestCode == LOCATION_PERMISSION_GRANTED_ID
                 || requestCode == READ_EXTERNAL_STORAGE_PERMISSION_GRANTED_ID
                 || requestCode == WRITE_STORAGE_AND_CAMERA_PERMISSION_GRANTED_ID){
-            // If request is cancelled, the result arrays are empty.
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
-                Toast.makeText(this,R.string.permission_granted_message,Toast.LENGTH_SHORT).show();
-            else
-                Toast.makeText(this,R.string.permission_denied_message,Toast.LENGTH_SHORT).show();
+
+            // If permission WAS granted...
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                Timber.d("Permissions WERE Granted... =)");
+                // If location was granted the retry to get current location.
+                if (requestCode == LOCATION_PERMISSION_GRANTED_ID) {
+                    Toast.makeText(this, R.string.location_granted_message, Toast.LENGTH_SHORT).show();
+                    getCurrentLocation();
+                } else {
+                    Toast.makeText(this, R.string.permission_granted_message, Toast.LENGTH_SHORT).show();
+                }
+
+            }
+            else  // If permission WERE NOT granted...
+            {
+                Timber.d("Permissions NOT granted... =(");
+                Toast.makeText(this, R.string.permission_denied_message, Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        // Setop the location updates if the activity is paused.
+        Timber.d("onPause. So stopping location updates...");
         stopLocationUpdates();
     }
 
@@ -494,7 +558,6 @@ public class CustomerEditActivity extends AppCompatActivity implements OnMapRead
                 .subscribe(new Action1<CharSequence>() {
                     @Override
                     public void call(CharSequence charSequence) {
-                        Timber.i("CustomerName: "+charSequence.toString());
                         mViewModel.customerName = charSequence.toString();
                     }
                 });
@@ -593,11 +656,10 @@ public class CustomerEditActivity extends AppCompatActivity implements OnMapRead
 
         @Override
         public void onLoadFinished(Loader<CustomerEditViewModel> loader, CustomerEditViewModel viewModelFromDB) {
-            Timber.i("LoadCustomerLoader: onLoadFinished is called.");
-
 
             // If something happened when
             if(viewModelFromDB == null){
+                Timber.d("Could NOT load Customer info from DB...");
                 Toast.makeText(CustomerEditActivity.this,R.string.customer_not_found,Toast.LENGTH_SHORT).show();
                 return;
             }

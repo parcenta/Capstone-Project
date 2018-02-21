@@ -4,4 +4,6 @@
 
     <dimen name="customer_edit_activity_container_width">500sp</dimen>
     <dimen name="customer_edit_activity_container_margin">16dp</dimen>
+
+    <integer name="vertical_enter_transition_animation">500</integer>
 </resources>

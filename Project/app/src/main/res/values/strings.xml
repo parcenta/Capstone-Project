@@ -10,8 +10,9 @@
     <string name="customer_search_hint">Search by name...</string>
     <string name="unknown">Unknown</string>
 
-    <string name="an_error_has_ocurred">An error has ocurred. Please try again.</string>
+    <string name="an_error_has_ocurred">An error has occurred. Please try again.</string>
     <string name="permission_denied_message">Permission was denied. Permission must be granted to complete the desired task.</string>
+    <string name="location_granted_message">Location permission was granted.</string>
     <string name="permission_granted_message">Permission was granted. Please try again.</string>
 
 
