@@ -3,22 +3,24 @@ package com.peterarkt.customerconnect.ui.customerDetail;
 import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
+import android.os.AsyncTask;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
-import android.view.Menu;
 import android.view.View;
+import android.widget.Toast;
 
 import com.peterarkt.customerconnect.R;
+import com.peterarkt.customerconnect.database.provider.CustomerDBUtils;
 import com.peterarkt.customerconnect.databinding.ActivityCustomerDetailBinding;
+import com.peterarkt.customerconnect.ui.CustomerConnectMainActivityHandler;
 import com.peterarkt.customerconnect.ui.customerDetail.customerDetailHeader.CustomerDetailHeaderFragment;
 
 import timber.log.Timber;
 
-public class CustomerDetailActivity extends AppCompatActivity {
+public class CustomerDetailActivity extends AppCompatActivity implements CustomerConnectMainActivityHandler{
 
     private final static String CUSTOMER_ID = "CUSTOMER_ID";
 
@@ -27,6 +29,8 @@ public class CustomerDetailActivity extends AppCompatActivity {
     private ActivityCustomerDetailBinding mBinding;
 
     CustomerDetailPagerAdapter mPagerAdapter;
+
+    private AsyncTask mDeleteCustomerAsyncTask;
 
     /* -----------------------------------------------------------------
      * Launch Helper
@@ -53,6 +57,12 @@ public class CustomerDetailActivity extends AppCompatActivity {
 
         // Set toolbar.
         setSupportActionBar(mBinding.toolbar);
+        mBinding.toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onBackPressed();
+            }
+        });
 
         // --------------------------------------
         // Get the Customer Id.
@@ -102,5 +112,44 @@ public class CustomerDetailActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    @Override
+    public void showCustomerSelected(int customerId) {
+        // No need.
+    }
+
+    @Override
+    public void deleteCustomer(int customerId) {
+        // Cancel any previous asynctask.
+        if(mDeleteCustomerAsyncTask!=null && !mDeleteCustomerAsyncTask.isCancelled()) mDeleteCustomerAsyncTask.cancel(true);
+
+        // Initiating an asynctask.
+        mDeleteCustomerAsyncTask = new AsyncTask<Object,Void,String>() {
+            @Override
+            protected String doInBackground(Object[] objects) {
+
+                // Check if the deletion was correct.
+                boolean deletionSuccessfully = CustomerDBUtils.deleteCustomerAndVisits(CustomerDetailActivity.this,mCustomerId);
+
+                // If it was correct then I return an empty error message. If not, then i return a "error ocurred" message.
+                return deletionSuccessfully ? "" : getString(R.string.an_error_has_ocurred);
+            }
+
+            @Override
+            protected void onPostExecute(String errorMessage) {
+                super.onPostExecute(errorMessage);
+
+                if(errorMessage!= null && errorMessage.isEmpty()) {
+                    Toast.makeText(CustomerDetailActivity.this, R.string.customer_deleted_successfully, Toast.LENGTH_SHORT).show();
+                    finish();
+                }else{
+                    Toast.makeText(CustomerDetailActivity.this, R.string.an_error_has_ocurred, Toast.LENGTH_SHORT).show();
+                }
+            }
+        };
+
+        // Execute async task.
+        mDeleteCustomerAsyncTask.execute();
     }
 }

@@ -25,6 +25,7 @@ import com.peterarkt.customerconnect.database.contracts.CustomerContract;
 import com.peterarkt.customerconnect.database.provider.CustomerDBUtils;
 import com.peterarkt.customerconnect.databinding.FragmentCustomerDetailHeaderBinding;
 import com.peterarkt.customerconnect.ui.CustomerConnectMainActivity;
+import com.peterarkt.customerconnect.ui.CustomerConnectMainActivityHandler;
 import com.peterarkt.customerconnect.ui.customerDetail.CustomerDetailActivity;
 import com.peterarkt.customerconnect.ui.customerEdit.CustomerEditActivity;
 import com.peterarkt.customerconnect.ui.utils.Constants;
@@ -47,6 +48,8 @@ public class CustomerDetailHeaderFragment extends Fragment implements LoaderMana
     //
     private FragmentCustomerDetailHeaderBinding mBinding;
     private CustomerDetailHeaderViewModel mViewModel;
+
+    CustomerConnectMainActivityHandler mParentActivityHandler;
 
 
     public CustomerDetailHeaderFragment() {
@@ -91,7 +94,7 @@ public class CustomerDetailHeaderFragment extends Fragment implements LoaderMana
                 if(mViewModel != null) PhoneActionUtils.openImage(getActivity(),mViewModel.customerPhotoPath);
                 return true;
             case R.id.menu_delete_customer:
-
+                if(mParentActivityHandler!=null) mParentActivityHandler.deleteCustomer(mCustomerId);
                 return true;
         }
 
@@ -106,6 +109,21 @@ public class CustomerDetailHeaderFragment extends Fragment implements LoaderMana
                              Bundle savedInstanceState) {
         mBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_customer_detail_header, container, false);
         return mBinding.getRoot();
+    }
+
+    // Override onAttach to make sure that the container activity has implemented the callback
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+
+        // This makes sure that the host activity has implemented the callback interface
+        // If not, it throws an exception
+        try {
+            mParentActivityHandler         = (CustomerConnectMainActivityHandler) context;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(context.toString()
+                    + " must implement RecipeDetailFragmentStepAdapter.OnRecipeStepClickHandler AND RecipeDetailHandler");
+        }
     }
 
     /* --------------------------------------

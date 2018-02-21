@@ -51,7 +51,8 @@ public class CustomerListFragment extends Fragment implements LoaderManager.Load
     // For the Customer list´ RecyclerView
     List<CustomerItem> mItemList;
     CustomerListAdapter mAdapter;
-    private String mTextToSearch;
+
+    private String mTextToSearch = "";
 
     // Empty Constructor
     public CustomerListFragment(){
@@ -105,9 +106,15 @@ public class CustomerListFragment extends Fragment implements LoaderManager.Load
     }
 
     private void searchCustomer(String textToSearch){
+        mTextToSearch = textToSearch;
         Bundle searchBundle = new Bundle();
         searchBundle.putString(TEXT_TO_SEARCH,textToSearch);
         getLoaderManager().restartLoader(LOADER_CUSTOMER_SEARCH_ID, searchBundle,this);
+    }
+
+    // Called from parent activity.
+    public void restartSearchFromParentActivity(){
+        if(mTextToSearch!=null) searchCustomer(mTextToSearch);
     }
 
     @Override
@@ -147,6 +154,7 @@ public class CustomerListFragment extends Fragment implements LoaderManager.Load
         if(mItemList!=null && mItemList.size() > 0){
             mBinding.noCustomerFoundContainer.setVisibility(View.GONE);
             mBinding.customerListRecyclerView.setVisibility(View.VISIBLE);
+
         }else{ // If there are no results, then show only the "No Customers Found" message.
             mBinding.customerListRecyclerView.setVisibility(View.GONE);
             mBinding.noCustomerFoundContainer.setVisibility(View.VISIBLE);
