@@ -49,6 +49,22 @@
 
         <activity android:name=".ui.customerEdit.CustomerEditActivity" />
         <activity android:name=".ui.customerDetail.CustomerDetailActivity"></activity>
+
+
+
+
+        <!-- For Widget-->
+        <receiver android:name=".ui.widget.WidgetTodaysVisitsProvider">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/customer_todays_visits_widget_info" />
+        </receiver>
+        <service android:name=".ui.widget.WidgetIntentService" android:exported="false"/>
+        <service android:name=".ui.widget.WidgetTodaysVisitsGridService" android:exported="false" android:permission="android.permission.BIND_REMOTEVIEWS"/>
     </application>
 
 </manifest>

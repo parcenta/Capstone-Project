@@ -19,6 +19,7 @@ import com.peterarkt.customerconnect.ui.customerDetail.customerDetailHeader.Cust
 import com.peterarkt.customerconnect.ui.customerDetail.customerDetailInfo.CustomerDetailInfoFragment;
 import com.peterarkt.customerconnect.ui.customerDetail.customerDetailVisits.CustomerVisitsFragment;
 import com.peterarkt.customerconnect.ui.customersList.CustomerListFragment;
+import com.peterarkt.customerconnect.ui.widget.WidgetIntentService;
 
 public class CustomerConnectMainActivity extends AppCompatActivity implements CustomerConnectMainActivityHandler{
 
@@ -113,6 +114,9 @@ public class CustomerConnectMainActivity extends AppCompatActivity implements Cu
                     if (errorMessage.isEmpty()) {
                         // Show success toast message.
                         Toast.makeText(activity, R.string.customer_deleted_successfully, Toast.LENGTH_SHORT).show();
+
+                        // Refresh widget
+                        WidgetIntentService.startActionShowTodaysVisits(activity);
 
                         // Refresh the list of customers in the CustomerListFragment.
                         FragmentManager fm = activity.getSupportFragmentManager();

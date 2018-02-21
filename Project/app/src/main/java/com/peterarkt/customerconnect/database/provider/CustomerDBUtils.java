@@ -10,6 +10,10 @@ import com.peterarkt.customerconnect.database.contracts.CustomerContract;
 import com.peterarkt.customerconnect.database.contracts.VisitContract;
 import com.peterarkt.customerconnect.ui.customerEdit.CustomerEditViewModel;
 
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+
 import timber.log.Timber;
 
 
@@ -46,6 +50,25 @@ public class CustomerDBUtils {
                 orderBy);
 
         return cursor;
+    }
+
+    public static Cursor getTodaysVisits(Context context){
+        // Get today date at 0:00am.
+        Calendar c = new GregorianCalendar();
+        c.set(Calendar.HOUR_OF_DAY, 0); //anything 0 - 23
+        c.set(Calendar.MINUTE, 0);
+        c.set(Calendar.SECOND, 0);
+        Date today = c.getTime(); //the midnight, that's the first second of the day.
+        long todayInLong = today.getTime();
+        Timber.d("Showing Visits since " + new Date(todayInLong));
+
+
+        // Get Today's Visits Cursor.
+        return context.getContentResolver().query(VisitContract.VisitEntry.CONTENT_URI,
+                null,
+                VisitContract.VisitEntry.COLUMN_VISIT_DATETIME + " >= ?",
+                new String[]{String.valueOf(todayInLong)},
+                VisitContract.VisitEntry.COLUMN_VISIT_DATETIME + " DESC LIMIT 10");
     }
 
 

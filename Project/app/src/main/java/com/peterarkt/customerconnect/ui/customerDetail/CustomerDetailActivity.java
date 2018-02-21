@@ -17,6 +17,7 @@ import com.peterarkt.customerconnect.database.provider.CustomerDBUtils;
 import com.peterarkt.customerconnect.databinding.ActivityCustomerDetailBinding;
 import com.peterarkt.customerconnect.ui.CustomerConnectMainActivityHandler;
 import com.peterarkt.customerconnect.ui.customerDetail.customerDetailHeader.CustomerDetailHeaderFragment;
+import com.peterarkt.customerconnect.ui.widget.WidgetIntentService;
 
 import timber.log.Timber;
 
@@ -141,7 +142,13 @@ public class CustomerDetailActivity extends AppCompatActivity implements Custome
                 super.onPostExecute(errorMessage);
 
                 if(errorMessage!= null && errorMessage.isEmpty()) {
+                    // Show success message
                     Toast.makeText(CustomerDetailActivity.this, R.string.customer_deleted_successfully, Toast.LENGTH_SHORT).show();
+
+                    // Refresh the widget.
+                    WidgetIntentService.startActionShowTodaysVisits(CustomerDetailActivity.this);
+
+                    // Close Activity
                     finish();
                 }else{
                     Toast.makeText(CustomerDetailActivity.this, R.string.an_error_has_ocurred, Toast.LENGTH_SHORT).show();

@@ -16,6 +16,7 @@ import android.widget.Toast;
 
 import com.peterarkt.customerconnect.R;
 import com.peterarkt.customerconnect.database.provider.CustomerDBUtils;
+import com.peterarkt.customerconnect.ui.widget.WidgetIntentService;
 
 import java.util.Date;
 
@@ -144,6 +145,9 @@ public class CustomerNewVisitDialogFragment extends DialogFragment {
             if(savedSuccessfully){
                 // Show Succesful message Toast.
                 Toast.makeText(getActivity(),R.string.visit_created_successfully,Toast.LENGTH_SHORT).show();
+
+                // Refresh the widget.
+                WidgetIntentService.startActionShowTodaysVisits(getActivity());
 
                 // Dismiss the dialog
                 dismiss();

@@ -3,6 +3,7 @@ package com.peterarkt.customerconnect.ui.customerDetail.customerDetailHeader;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.database.Cursor;
 import android.databinding.DataBindingUtil;
 import android.os.AsyncTask;
@@ -12,6 +13,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
+import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -94,7 +96,16 @@ public class CustomerDetailHeaderFragment extends Fragment implements LoaderMana
                 if(mViewModel != null) PhoneActionUtils.openImage(getActivity(),mViewModel.customerPhotoPath);
                 return true;
             case R.id.menu_delete_customer:
-                if(mParentActivityHandler!=null) mParentActivityHandler.deleteCustomer(mCustomerId);
+                new AlertDialog.Builder(getActivity())
+                        .setMessage(getString(R.string.ask_customer_to_be_deleted))
+                        .setCancelable(false)
+                        .setPositiveButton("YES", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                if(mParentActivityHandler!=null) mParentActivityHandler.deleteCustomer(mCustomerId);
+                            }
+                        })
+                        .setNegativeButton("NO", null)
+                        .show();
                 return true;
         }
 
