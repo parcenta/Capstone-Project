@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
@@ -40,6 +41,8 @@ public class CustomerListFragment extends Fragment implements LoaderManager.Load
     // Loader Id
     private final static int LOADER_CUSTOMER_SEARCH_ID = 7001;
 
+    private final static String LIST_STATE_KEY = "LIST_STATE_KEY";
+
     //
     private final static String TEXT_TO_SEARCH = "TEXT_TO_SEARCH";
 
@@ -51,6 +54,8 @@ public class CustomerListFragment extends Fragment implements LoaderManager.Load
     // For the Customer list´ RecyclerView
     List<CustomerItem> mItemList;
     CustomerListAdapter mAdapter;
+    LinearLayoutManager mLayoutManager;
+    Parcelable mListState;
 
     private String mTextToSearch = "";
 
@@ -69,8 +74,8 @@ public class CustomerListFragment extends Fragment implements LoaderManager.Load
 
         // Set Adapter
         mAdapter = new CustomerListAdapter(getActivity(),null, this);
-        LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
-        mBinding.customerListRecyclerView.setLayoutManager(layoutManager);
+        mLayoutManager = new LinearLayoutManager(getActivity());
+        mBinding.customerListRecyclerView.setLayoutManager(mLayoutManager);
         mBinding.customerListRecyclerView.setAdapter(mAdapter);
 
         // Set action to "New customer" FAB.
@@ -80,6 +85,11 @@ public class CustomerListFragment extends Fragment implements LoaderManager.Load
                 CustomerEditActivity.launch(getActivity(), Constants.INSERT_MODE,0);
             }
         });
+
+        // Recovering LayoutManager state.
+        if(savedInstanceState!=null){
+            mListState = savedInstanceState.getParcelable(LIST_STATE_KEY);
+        }
 
         return mBinding.getRoot();
     }
@@ -151,6 +161,7 @@ public class CustomerListFragment extends Fragment implements LoaderManager.Load
         mItemList = itemList;
 
         mAdapter.setItemList(mItemList);
+        if (mListState != null) mLayoutManager.onRestoreInstanceState(mListState);
 
         // If there are results, then show the list...
         if(mItemList!=null && mItemList.size() > 0){
@@ -169,7 +180,17 @@ public class CustomerListFragment extends Fragment implements LoaderManager.Load
         mAdapter.setItemList(null);
     }
 
+    /* ------------------------------------------------------------------------------------------------
+     *  OnSaveInstance/OnRestoreInstance.
+       ------------------------------------------------------------------------------------------------*/
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
 
+        // Save list state
+        mListState = mLayoutManager.onSaveInstanceState();
+        outState.putParcelable(LIST_STATE_KEY, mListState);
+    }
 
     /* ------------------------------------------------------------------------------------------------
      *  CustomerClick method (from Adapter´ interface).
