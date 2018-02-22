@@ -11,14 +11,8 @@ import com.peterarkt.customerconnect.ui.utils.Constants;
 import com.peterarkt.customerconnect.ui.utils.ValidationUtils;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
-import timber.log.Timber;
-
-/**
- * Created by Andrés on 2/6/18.
- */
 
 public class CustomerEditHelper {
 

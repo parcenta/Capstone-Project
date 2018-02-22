@@ -2,7 +2,6 @@ package com.peterarkt.customerconnect.ui.customersList;
 
 
 import android.content.Context;
-import android.content.Intent;
 import android.database.Cursor;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
@@ -277,7 +276,7 @@ public class CustomerListFragment extends Fragment implements LoaderManager.Load
                         // Add to the list.
                         itemList.add(new CustomerItem(customerId,customerName,customerAddressStreet,customerPhotoUrl));
 
-                    };
+                    }
                 }
 
                 // Close the cursor.

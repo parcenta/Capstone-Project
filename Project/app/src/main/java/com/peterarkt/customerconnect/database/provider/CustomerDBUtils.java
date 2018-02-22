@@ -8,7 +8,6 @@ import android.net.Uri;
 
 import com.peterarkt.customerconnect.database.contracts.CustomerContract;
 import com.peterarkt.customerconnect.database.contracts.VisitContract;
-import com.peterarkt.customerconnect.ui.customerEdit.CustomerEditViewModel;
 
 import java.util.Calendar;
 import java.util.Date;

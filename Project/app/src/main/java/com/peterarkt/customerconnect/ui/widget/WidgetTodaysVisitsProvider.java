@@ -11,10 +11,6 @@ import android.widget.RemoteViews;
 import com.peterarkt.customerconnect.R;
 import com.peterarkt.customerconnect.database.provider.CustomerDBUtils;
 
-/**
- * Created by USUARIO on 20/02/2018.
- */
-
 public class WidgetTodaysVisitsProvider  extends AppWidgetProvider {
 
     private static void updateAppWidget(Context context, AppWidgetManager appWidgetManager, int appWidgetId) {

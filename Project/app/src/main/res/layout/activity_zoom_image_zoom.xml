@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
+<merge
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:android="http://schemas.android.com/apk/res/android"
@@ -12,4 +12,4 @@
         android:adjustViewBounds="true"
         tools:src="@drawable/ic_material_camera_gray"
         />
-</FrameLayout>
+</merge>

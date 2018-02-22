@@ -1,8 +1,5 @@
 package com.peterarkt.customerconnect.ui.customersList;
 
-/**
- * Created by Andrés on 2/4/18.
- */
 
 public class CustomerItem {
 

@@ -3,10 +3,6 @@ package com.peterarkt.customerconnect.ui.utils;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * Created by USUARIO on 19/02/2018.
- */
-
 public class ValidationUtils {
 
     // Phone number validation

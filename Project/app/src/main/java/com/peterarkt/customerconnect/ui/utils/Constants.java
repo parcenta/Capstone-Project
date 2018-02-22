@@ -4,10 +4,6 @@ import android.content.Context;
 
 import com.peterarkt.customerconnect.R;
 
-/**
- * Created by Andrés on 2/14/18.
- */
-
 public class Constants {
 
     public final static String UPDATE_MODE = "UPD";

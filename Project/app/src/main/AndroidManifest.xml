@@ -36,7 +36,7 @@
         <provider
             android:name=".database.provider.CustomerConnectProvider"
             android:authorities="@string/content_authority"
-            android:exported="true" />
+            android:exported="false" />
 
         <!-- File Provider -->
         <provider

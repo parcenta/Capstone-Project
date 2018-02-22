@@ -120,11 +120,6 @@ public class CustomerNewVisitDialogFragment extends DialogFragment {
     private class SaveNewVisitAsyncTask extends AsyncTask<String,Void,Boolean> {
 
         @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-        }
-
-        @Override
         protected Boolean doInBackground(String... args) {
 
             if(args == null || args.length == 0) return false;

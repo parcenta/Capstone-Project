@@ -11,15 +11,10 @@ import com.peterarkt.customerconnect.database.contracts.VisitContract;
 import com.peterarkt.customerconnect.database.provider.CustomerDBUtils;
 import com.peterarkt.customerconnect.ui.utils.DateUtils;
 
-import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 
 import timber.log.Timber;
 
-/**
- * Created by USUARIO on 20/02/2018.
- */
 
 public class WidgetTodaysVisitsGridService extends RemoteViewsService {
     @Override

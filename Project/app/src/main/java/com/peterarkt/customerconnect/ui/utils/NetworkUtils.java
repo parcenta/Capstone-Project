@@ -15,9 +15,6 @@ import java.util.Scanner;
 
 import timber.log.Timber;
 
-/**
- * Created by Andrés on 2/21/18.
- */
 
 public class NetworkUtils {
 

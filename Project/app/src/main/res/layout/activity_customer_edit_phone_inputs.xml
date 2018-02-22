@@ -23,7 +23,8 @@
 
             <ImageView
                 style="@style/CustomerConnect.Form.SectionImage"
-                android:src="@drawable/ic_material_phone_gray" />
+                android:src="@drawable/ic_material_phone_gray"
+                android:contentDescription="@string/form_customer_phone_number_placeholder"/>
 
             <!-- Name input area -->
             <android.support.design.widget.TextInputLayout

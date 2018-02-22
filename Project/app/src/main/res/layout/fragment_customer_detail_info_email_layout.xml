@@ -17,6 +17,7 @@
         <ImageView
             style="@style/CustomerConnect.Form.SectionImage"
             android:src="@drawable/ic_material_email_gray"
+            android:contentDescription="@string/customers_email"
             />
 
         <LinearLayout
@@ -40,7 +41,6 @@
         <ImageView
             android:id="@+id/action_send_email"
             style="@style/CustomerConnect.Form.SectionImage"
-            android:layout_marginLeft="16dp"
             android:layout_marginStart="16dp"
             android:src="@drawable/ic_material_email_gray"
             android:contentDescription="@string/send_email"

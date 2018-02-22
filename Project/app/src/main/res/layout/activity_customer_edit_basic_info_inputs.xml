@@ -21,6 +21,7 @@
             <ImageView
                 style="@style/CustomerConnect.Form.SectionImage"
                 android:src="@drawable/ic_material_person_gray"
+                android:contentDescription="@string/form_customer_name_placeholder"
                 />
 
             <!-- Name input area -->

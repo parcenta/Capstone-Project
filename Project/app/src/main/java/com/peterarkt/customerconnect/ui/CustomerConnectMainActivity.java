@@ -1,14 +1,12 @@
 package com.peterarkt.customerconnect.ui;
 
 
-import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.os.AsyncTask;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.Toast;
 
@@ -170,10 +168,5 @@ public class CustomerConnectMainActivity extends AppCompatActivity implements Cu
         // Execute async task.
         mDeleteCustomerAsyncTask.execute();
 
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
     }
 }

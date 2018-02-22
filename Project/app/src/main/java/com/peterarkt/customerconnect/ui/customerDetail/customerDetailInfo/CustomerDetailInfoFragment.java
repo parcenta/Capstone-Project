@@ -156,7 +156,7 @@ public class CustomerDetailInfoFragment extends Fragment  implements LoaderManag
                     mBinding.phoneLayout.customerInfoPhoneType.setText(addressTypeDescription);
                 }catch (Exception e){
                     e.printStackTrace();
-                    mBinding.phoneLayout.customerInfoPhoneType.setText("Error");
+                    mBinding.phoneLayout.customerInfoPhoneType.setText(getString(R.string.error));
                 }
             }
 

@@ -23,6 +23,7 @@
             <ImageView
                 style="@style/CustomerConnect.Form.SectionImage"
                 android:src="@drawable/ic_material_email_gray"
+                android:contentDescription="@string/form_customer_email_placeholder"
                 />
 
             <!-- Name input area -->

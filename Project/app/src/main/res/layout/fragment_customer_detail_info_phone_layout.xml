@@ -17,6 +17,7 @@
         <ImageView
             style="@style/CustomerConnect.Form.SectionImage"
             android:src="@drawable/ic_material_phone_gray"
+            android:contentDescription="@string/customers_phone"
             />
 
         <LinearLayout
@@ -47,7 +48,6 @@
         <ImageButton
             android:id="@+id/action_call_phone"
             style="@style/CustomerConnect.Form.SectionImage"
-            android:layout_marginLeft="16dp"
             android:layout_marginStart="16dp"
             android:src="@drawable/ic_material_phone_gray"
             android:contentDescription="@string/call"

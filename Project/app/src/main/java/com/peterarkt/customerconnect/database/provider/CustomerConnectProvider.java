@@ -14,15 +14,8 @@ import android.support.annotation.Nullable;
 import com.peterarkt.customerconnect.database.CustomerConnectDBHelper;
 import com.peterarkt.customerconnect.database.contracts.CustomerContract;
 import com.peterarkt.customerconnect.database.contracts.VisitContract;
-import com.peterarkt.customerconnect.ui.customerDetail.customerDetailVisits.CustomerVisit;
-
-import java.util.Timer;
 
 import timber.log.Timber;
-
-/**
- * Created by Andrés on 2/1/18.
- */
 
 public class CustomerConnectProvider extends ContentProvider {
 

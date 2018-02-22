@@ -3,7 +3,6 @@ package com.peterarkt.customerconnect.database;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
 import com.peterarkt.customerconnect.database.contracts.CustomerContract;
 import com.peterarkt.customerconnect.database.contracts.VisitContract;

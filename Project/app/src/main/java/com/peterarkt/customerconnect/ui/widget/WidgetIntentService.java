@@ -24,6 +24,9 @@ public class WidgetIntentService extends IntentService {
     protected void onHandleIntent(@Nullable Intent intent) {
         if(intent!=null){
             final String action = intent.getAction();
+
+            if(action == null || action.isEmpty()) return;
+
             if(action.equals(ACTION_WIDGET_SHOW_TODAYS_VISITS))
                 handleShowTodaysVisits();
         }

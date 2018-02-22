@@ -17,9 +17,6 @@ import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.concurrent.ExecutionException;
-
-import timber.log.Timber;
 
 public class MediaUtils {
 

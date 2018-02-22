@@ -11,13 +11,8 @@ import android.widget.Toast;
 import com.peterarkt.customerconnect.R;
 import com.peterarkt.customerconnect.databinding.ListItemCustomerBinding;
 import com.squareup.picasso.Picasso;
-import com.squareup.picasso.RequestCreator;
 
 import java.util.List;
-
-/**
- * Created by Andrés on 2/2/18.
- */
 
 public class CustomerListAdapter extends RecyclerView.Adapter<CustomerListAdapter.CustomerListViewHolder>{
 

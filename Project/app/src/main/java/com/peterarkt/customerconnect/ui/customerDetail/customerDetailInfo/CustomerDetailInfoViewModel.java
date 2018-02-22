@@ -1,8 +1,5 @@
 package com.peterarkt.customerconnect.ui.customerDetail.customerDetailInfo;
 
-/**
- * Created by Andrés on 2/9/18.
- */
 
 public class CustomerDetailInfoViewModel {
 

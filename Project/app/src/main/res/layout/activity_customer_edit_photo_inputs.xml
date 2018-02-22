@@ -26,6 +26,7 @@
                     style="@style/CustomerConnect.Form.SectionImage"
                     android:src="@drawable/ic_material_camera_gray"
                     android:layout_gravity="top"
+                    android:contentDescription="@string/attach_or_take_photo_for_customer"
                     />
 
                 <!-- Name input area -->
@@ -47,6 +48,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:minHeight="200dp"
+                            android:contentDescription="@string/customers_selected_customer"
                             />
                         <ImageButton
                             android:id="@+id/action_delete_customer_photo"
@@ -73,8 +75,9 @@
                             android:layout_height="wrap_content"
                             android:text="@string/attach_photo"
                             style="@style/CustomerConnect.Button.Colored"
-                            android:drawableLeft="@drawable/ic_material_attach_white"
+                            android:drawableStart="@drawable/ic_material_attach_white"
                             android:drawablePadding="6dp"
+                            android:contentDescription="@string/attach_photo"
                             />
 
                         <TextView
@@ -89,8 +92,9 @@
                             android:layout_height="wrap_content"
                             style="@style/CustomerConnect.Button.Colored"
                             android:text="@string/take_photo"
-                            android:drawableLeft="@drawable/ic_material_take_photo_white"
+                            android:drawableStart="@drawable/ic_material_take_photo_white"
                             android:drawablePadding="6dp"
+                            android:contentDescription="@string/take_photo"
                             />
 
                     </LinearLayout>

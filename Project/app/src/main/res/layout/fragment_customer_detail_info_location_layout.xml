@@ -16,6 +16,7 @@
         <ImageView
             style="@style/CustomerConnect.Form.SectionImage"
             android:src="@drawable/ic_material_location_gray"
+            android:contentDescription="@string/customers_location"
             />
 
         <LinearLayout
