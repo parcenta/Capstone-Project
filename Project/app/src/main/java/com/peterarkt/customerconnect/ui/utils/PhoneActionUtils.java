@@ -3,29 +3,20 @@ package com.peterarkt.customerconnect.ui.utils;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.support.v4.content.FileProvider;
 import android.widget.Toast;
 
 import com.peterarkt.customerconnect.R;
+
+import java.io.File;
+
+import timber.log.Timber;
 
 /**
  * Created by USUARIO on 19/02/2018.
  */
 
 public class PhoneActionUtils {
-
-    public static void openImage(Context context, String photoPath){
-        if(context == null) return;
-
-        if(photoPath.isEmpty()){
-            Toast.makeText(context,"No image is found.",Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        Intent intent = new Intent();
-        intent.setAction(Intent.ACTION_VIEW);
-        intent.setDataAndType(Uri.parse("file://" + photoPath), "image/*");
-        context.startActivity(intent);
-    }
 
 
     public static void makePhoneCall(Context context, String phoneNumber){

@@ -2,13 +2,15 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.peterarkt.customerconnect">
 
-    <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
-    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.CAMERA" />
 
     <application
         android:name=".CustomerConnectApplication"
@@ -44,16 +46,13 @@
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_paths"></meta-data>
+                android:resource="@xml/file_paths" />
         </provider>
 
         <activity android:name=".ui.customerEdit.CustomerEditActivity" />
-        <activity android:name=".ui.customerDetail.CustomerDetailActivity"></activity>
+        <activity android:name=".ui.customerDetail.CustomerDetailActivity" />
 
-
-
-
-        <!-- For Widget-->
+        <!-- For Widget -->
         <receiver android:name=".ui.widget.WidgetTodaysVisitsProvider">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -63,8 +62,16 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/customer_todays_visits_widget_info" />
         </receiver>
-        <service android:name=".ui.widget.WidgetIntentService" android:exported="false"/>
-        <service android:name=".ui.widget.WidgetTodaysVisitsGridService" android:exported="false" android:permission="android.permission.BIND_REMOTEVIEWS"/>
+
+        <service
+            android:name=".ui.widget.WidgetIntentService"
+            android:exported="false" />
+        <service
+            android:name=".ui.widget.WidgetTodaysVisitsGridService"
+            android:exported="false"
+            android:permission="android.permission.BIND_REMOTEVIEWS" />
+
+        <activity android:name=".ui.customerDetail.ZoomImageActivity"></activity>
     </application>
 
 </manifest>

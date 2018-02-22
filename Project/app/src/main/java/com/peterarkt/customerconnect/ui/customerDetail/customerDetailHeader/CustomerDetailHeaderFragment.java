@@ -1,12 +1,10 @@
 package com.peterarkt.customerconnect.ui.customerDetail.customerDetailHeader;
 
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.database.Cursor;
 import android.databinding.DataBindingUtil;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -26,12 +24,10 @@ import com.peterarkt.customerconnect.R;
 import com.peterarkt.customerconnect.database.contracts.CustomerContract;
 import com.peterarkt.customerconnect.database.provider.CustomerDBUtils;
 import com.peterarkt.customerconnect.databinding.FragmentCustomerDetailHeaderBinding;
-import com.peterarkt.customerconnect.ui.CustomerConnectMainActivity;
 import com.peterarkt.customerconnect.ui.CustomerConnectMainActivityHandler;
-import com.peterarkt.customerconnect.ui.customerDetail.CustomerDetailActivity;
+import com.peterarkt.customerconnect.ui.customerDetail.ZoomImageActivity;
 import com.peterarkt.customerconnect.ui.customerEdit.CustomerEditActivity;
 import com.peterarkt.customerconnect.ui.utils.Constants;
-import com.peterarkt.customerconnect.ui.utils.PhoneActionUtils;
 import com.squareup.picasso.Picasso;
 
 import timber.log.Timber;
@@ -93,7 +89,13 @@ public class CustomerDetailHeaderFragment extends Fragment implements LoaderMana
                 CustomerEditActivity.launch(getActivity(), Constants.UPDATE_MODE,mCustomerId);
                 return true;
             case R.id.menu_zoom_customer_image:
-                if(mViewModel != null) PhoneActionUtils.openImage(getActivity(),mViewModel.customerPhotoPath);
+                //if(mViewModel != null) PhoneActionUtils.openImage(getActivity(),mViewModel.customerPhotoPath);
+                if(mViewModel != null) {
+                    if(mViewModel.customerPhotoPath.isEmpty())
+                        Toast.makeText(getActivity(),R.string.no_image_path_is_found,Toast.LENGTH_SHORT).show();
+                    else
+                        ZoomImageActivity.launch(getActivity(), mViewModel.customerPhotoPath);
+                }
                 return true;
             case R.id.menu_delete_customer:
                 new AlertDialog.Builder(getActivity())
@@ -171,9 +173,16 @@ public class CustomerDetailHeaderFragment extends Fragment implements LoaderMana
             if(!viewModel.customerPhotoPath.isEmpty()){
                 Picasso.with(getActivity())
                         .load("file://" + viewModel.customerPhotoPath)
-                        .error(R.drawable.ic_material_person_gray)
+                        .error(R.drawable.ic_material_error_gray)
                         .fit()
                         .centerCrop()
+                        .into(mBinding.customerPhotoBackgroundImageView);
+            }else{
+                Picasso.with(getActivity())
+                        .load(R.drawable.ic_material_person_gray)
+                        .fit()
+                        .centerCrop()
+                        .error(R.drawable.ic_material_person_gray)
                         .into(mBinding.customerPhotoBackgroundImageView);
             }
         }
