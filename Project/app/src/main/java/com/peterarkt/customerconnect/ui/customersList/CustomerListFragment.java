@@ -189,7 +189,7 @@ public class CustomerListFragment extends Fragment implements LoaderManager.Load
 
         // Save list state
         mListState = mLayoutManager.onSaveInstanceState();
-        outState.putParcelable(LIST_STATE_KEY, mListState);
+        if(mListState!=null) outState.putParcelable(LIST_STATE_KEY, mListState);
     }
 
     /* ------------------------------------------------------------------------------------------------

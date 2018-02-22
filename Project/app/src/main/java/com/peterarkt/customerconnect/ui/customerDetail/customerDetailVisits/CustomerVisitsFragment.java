@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.database.Cursor;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
@@ -28,9 +29,14 @@ import timber.log.Timber;
 
 public class CustomerVisitsFragment extends Fragment  implements LoaderManager.LoaderCallbacks<CustomerVisitsViewModel>{
 
-
+    // Bundle keys
     private static final String CUSTOMER_ID = "CUSTOMER_ID";
+
+    // Loader ID
     private static final int LOAD_CUSTOMER_VISITS = 8003;
+
+    // For preserving the Recycler view position.
+    private final static String LIST_STATE_KEY = "LIST_STATE_KEY";
 
     // Received Customer Id.
     int mCustomerId;
@@ -39,6 +45,8 @@ public class CustomerVisitsFragment extends Fragment  implements LoaderManager.L
     private FragmentCustomerVisitsBinding mBinding;
     private CustomerVisitsViewModel mViewModel;
     private CustomerVisitsAdapter mAdapter;
+    LinearLayoutManager mLayoutManager;
+    Parcelable mListState;
 
     private CustomerNewVisitDialogFragment newVisitDialogFragment;
 
@@ -107,9 +115,15 @@ public class CustomerVisitsFragment extends Fragment  implements LoaderManager.L
 
         // Set Adapter
         mAdapter = new CustomerVisitsAdapter(null);
-        LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
-        mBinding.customerDetailVisitsRecyclerView.setLayoutManager(layoutManager);
+        mLayoutManager = new LinearLayoutManager(getActivity());
+        mBinding.customerDetailVisitsRecyclerView.setLayoutManager(mLayoutManager);
         mBinding.customerDetailVisitsRecyclerView.setAdapter(mAdapter);
+
+
+        // Recovering LayoutManager state.
+        if(savedInstanceState!=null){
+            mListState = savedInstanceState.getParcelable(LIST_STATE_KEY);
+        }
 
         return mBinding.getRoot();
     }
@@ -134,7 +148,7 @@ public class CustomerVisitsFragment extends Fragment  implements LoaderManager.L
         newVisitDialogFragment.setOnDismissListener(new DialogInterface.OnDismissListener() {
             @Override
             public void onDismiss(DialogInterface dialogInterface) {
-                // Just CHecking there is an activity attached.
+                // Just Checking there is an activity attached.
                 Context context = getActivity();
                 if(context == null) return;
 
@@ -142,6 +156,18 @@ public class CustomerVisitsFragment extends Fragment  implements LoaderManager.L
                 getLoaderManager().restartLoader(LOAD_CUSTOMER_VISITS,null,CustomerVisitsFragment.this);
             }
         });
+    }
+
+    /* ------------------------------------------------------------------------------------------------
+     *  OnSaveInstance/OnRestoreInstance.
+       ------------------------------------------------------------------------------------------------*/
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        // Save list state
+        mListState = mLayoutManager.onSaveInstanceState();
+        if(mListState!=null) outState.putParcelable(LIST_STATE_KEY, mListState);
     }
 
     /* --------------------------------------
@@ -155,11 +181,22 @@ public class CustomerVisitsFragment extends Fragment  implements LoaderManager.L
     @Override
     public void onLoadFinished(Loader<CustomerVisitsViewModel> loader, CustomerVisitsViewModel viewModel) {
         mViewModel = viewModel;
+
+        // Setting the adapter´ list.
         mAdapter.setItemList(viewModel.visitsList);
+
+        // Recovering list state.
+        if (mListState != null) mLayoutManager.onRestoreInstanceState(mListState);
+
+        // If there are existing visits...
         if(mViewModel.visitsList.size()>0){
+            Timber.d("Customer has visits...");
             mBinding.noVisitsFoundTextView.setVisibility(View.GONE);
             mBinding.customerDetailVisitsRecyclerView.setVisibility(View.VISIBLE);
-        }else {
+        }
+        else
+         {
+            Timber.d("Customer has NO visits...");
             mBinding.customerDetailVisitsRecyclerView.setVisibility(View.VISIBLE);
             mBinding.noVisitsFoundTextView.setVisibility(View.VISIBLE);
         }
