@@ -10,8 +10,22 @@ android {
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
+
+    // For Release
+    signingConfigs {
+        release {
+            storeFile file("../../SigningConfigurations/CustomerConnectSigning.jks")
+            storePassword "udacity"
+            keyAlias "udacity"
+            keyPassword "udacity"
+        }
+    }
+
     buildTypes {
         release {
+            // Setting the release configuration
+            signingConfig signingConfigs.release
+
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
 
