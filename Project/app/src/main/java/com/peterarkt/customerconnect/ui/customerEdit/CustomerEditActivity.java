@@ -11,6 +11,7 @@ import android.database.Cursor;
 import android.databinding.DataBindingUtil;
 import android.location.Location;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Looper;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
@@ -51,10 +52,12 @@ import com.peterarkt.customerconnect.database.provider.CustomerDBUtils;
 import com.peterarkt.customerconnect.databinding.ActivityCustomerEditBinding;
 import com.peterarkt.customerconnect.ui.utils.Constants;
 import com.peterarkt.customerconnect.ui.utils.MediaUtils;
+import com.peterarkt.customerconnect.ui.utils.NetworkUtils;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
@@ -102,6 +105,9 @@ public class CustomerEditActivity extends AppCompatActivity implements OnMapRead
     // Map
     private GoogleMap mMap;
 
+    //
+    private AsyncTask mSearchCityAndCountryAsyncTask;
+
 
     /* -----------------------------------------------------------------
      * Launch Helper
@@ -137,6 +143,9 @@ public class CustomerEditActivity extends AppCompatActivity implements OnMapRead
         Slide slide = new Slide(Gravity.BOTTOM);
         slide.setDuration(getResources().getInteger(R.integer.vertical_enter_transition_animation));
         slide.setInterpolator(AnimationUtils.loadInterpolator(this, android.R.interpolator.fast_out_slow_in));
+        // Avoid to animate the bottom and notification bar. Source: https://stackoverflow.com/questions/26600263/how-do-i-prevent-the-status-bar-and-navigation-bar-from-animating-during-an-acti
+        slide.excludeTarget(android.R.id.statusBarBackground, true);
+        slide.excludeTarget(android.R.id.navigationBarBackground, true);
         getWindow().setEnterTransition(slide);
 
         // Binding the view.
@@ -483,6 +492,9 @@ public class CustomerEditActivity extends AppCompatActivity implements OnMapRead
                     mViewModel.customerAddressLongitude  = location.getLongitude();
                     Timber.d("Latitude: " + mViewModel.customerAddressLatitude + ", Longitude:" + mViewModel.customerAddressLongitude);
 
+                    // Began to search for the city and country.
+                    getCityAndCountryWithGivenLocations();
+
                     // Refreshing the map with the given coordinates
                     refreshMap();
                 }
@@ -498,11 +510,6 @@ public class CustomerEditActivity extends AppCompatActivity implements OnMapRead
         try {
             Timber.d("Stopping location updates...");
             if (mFusedLocationClient!= null) mFusedLocationClient.removeLocationUpdates(mLocationCallback);
-
-            // Hide Progress bar.
-            mBinding.locationLayout.currentLocationProgressBar.setVisibility(View.GONE);
-            mBinding.locationLayout.actionSearchCurrentLocation.setVisibility(View.VISIBLE);
-
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -544,6 +551,7 @@ public class CustomerEditActivity extends AppCompatActivity implements OnMapRead
         super.onPause();
         Timber.d("onPause. So stopping location updates...");
         stopLocationUpdates();
+        if(mSearchCityAndCountryAsyncTask!=null && !mSearchCityAndCountryAsyncTask.isCancelled()) mSearchCityAndCountryAsyncTask.cancel(true);
     }
 
      /* -----------------------------------------------------------------------------------------------------------------
@@ -608,6 +616,7 @@ public class CustomerEditActivity extends AppCompatActivity implements OnMapRead
                 .subscribe(new Action1<CharSequence>() {
                     @Override
                     public void call(CharSequence charSequence) {
+                        Timber.i("Country was set to: " + charSequence.toString());
                         mViewModel.customerAdressCountry = charSequence.toString();
                     }
                 });
@@ -618,6 +627,7 @@ public class CustomerEditActivity extends AppCompatActivity implements OnMapRead
                 .subscribe(new Action1<CharSequence>() {
                     @Override
                     public void call(CharSequence charSequence) {
+                        Timber.i("City was set to: " + charSequence.toString());
                         mViewModel.customerAddressCity = charSequence.toString();
                     }
                 });
@@ -638,6 +648,74 @@ public class CustomerEditActivity extends AppCompatActivity implements OnMapRead
     }
 
 
+    private void getCityAndCountryWithGivenLocations(){
+
+        if(mViewModel == null) return;
+
+
+        mSearchCityAndCountryAsyncTask = new AsyncTask<Object,Void,String>(){
+
+            @Override
+            protected String doInBackground(Object... objects) {
+
+                Context context = CustomerEditActivity.this;
+
+                try {
+                    // Build URL to search the location.
+                    URL movieDetailRequestUrl = NetworkUtils.buildUrlForSearchCityAndCountry(context,
+                            mViewModel.customerAddressLatitude,
+                            mViewModel.customerAddressLongitude);
+
+                    String response = NetworkUtils.getResponseFromHttpUrl(context, movieDetailRequestUrl);
+                    if(response==null)
+                        return null;
+
+                    // Get the Basic Info of the Movie from json response.
+                    return CustomerEditHelper.getCityAndCountryFromJson(response);
+                }catch (Exception e){
+                    e.printStackTrace();
+                    return null;
+                }
+            }
+
+
+            @Override
+            protected void onPostExecute(String countryAndCityString) {
+                super.onPostExecute(countryAndCityString);
+
+                if(countryAndCityString == null || countryAndCityString.isEmpty()) {
+                    Timber.i("Something happens when trying to find the city and country with the given coordinates");
+                    Toast.makeText(CustomerEditActivity.this,R.string.could_not_find_city_and_country,Toast.LENGTH_LONG).show();
+
+                    // Hide Progress bar.
+                    mBinding.locationLayout.currentLocationProgressBar.setVisibility(View.GONE);
+                    mBinding.locationLayout.actionSearchCurrentLocation.setVisibility(View.VISIBLE);
+
+                    return;
+                }
+
+                Timber.i("Country and City found!!!! Result: " + countryAndCityString);
+                if(mBinding!=null && mViewModel!=null){
+                    String[] cityAndCountryArray = countryAndCityString.split(",");
+                    if(cityAndCountryArray.length>=2){
+                        String city = cityAndCountryArray[0];
+                        String country = cityAndCountryArray[1];
+                        mBinding.locationLayout.inputCustomerAddressCity.setText(city);
+                        mBinding.locationLayout.inputCustomerAddressCountry.setText(country);
+
+                        // Hide Progress bar.
+                        mBinding.locationLayout.currentLocationProgressBar.setVisibility(View.GONE);
+                        mBinding.locationLayout.actionSearchCurrentLocation.setVisibility(View.VISIBLE);
+                    }
+                }
+
+
+            }
+        };
+
+        // Executing Async task.
+        mSearchCityAndCountryAsyncTask.execute();
+    }
 
 
 

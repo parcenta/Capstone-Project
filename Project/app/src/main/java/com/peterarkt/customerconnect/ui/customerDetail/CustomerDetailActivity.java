@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.AsyncTask;
 import android.support.design.widget.TabLayout;
-import android.support.graphics.drawable.AnimationUtilsCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
@@ -71,6 +70,8 @@ public class CustomerDetailActivity extends AppCompatActivity implements Custome
         Slide slide = new Slide(Gravity.END);
         slide.setDuration(300);
         slide.setInterpolator(AnimationUtils.loadInterpolator(this, android.R.interpolator.fast_out_slow_in));
+        slide.excludeTarget(android.R.id.statusBarBackground, true);
+        slide.excludeTarget(android.R.id.navigationBarBackground, true);
         getWindow().setEnterTransition(slide);
 
         // Set toolbar.

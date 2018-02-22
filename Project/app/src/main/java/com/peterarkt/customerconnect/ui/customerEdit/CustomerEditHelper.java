@@ -10,6 +10,10 @@ import com.peterarkt.customerconnect.database.provider.CustomerDBUtils;
 import com.peterarkt.customerconnect.ui.utils.Constants;
 import com.peterarkt.customerconnect.ui.utils.ValidationUtils;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import timber.log.Timber;
 
 /**
@@ -110,6 +114,60 @@ public class CustomerEditHelper {
         }
 
         return viewModelFromDB;
+    }
+
+
+    public static String getCityAndCountryFromJson(String jsonResponse) throws Exception {
+
+        String cityString = "";
+        String countryString = "";
+
+        // Convert the JsonString to JsonObject.
+        JSONObject movieDetailJson = new JSONObject(jsonResponse);
+
+        // Get Values from JSON.
+        JSONArray resultsArray = movieDetailJson.getJSONArray("results");
+        if(resultsArray == null || resultsArray.length() == 0)
+            return null;
+
+            // Get First result as JsonObject.
+            JSONObject oneResult = resultsArray.getJSONObject(0);
+            if(oneResult == null) return null;
+
+            // Get "address_components" JsonArray from the JsonObject.
+            JSONArray componentsArray = oneResult.getJSONArray("address_components");
+            if(componentsArray == null || componentsArray.length() == 0)
+                return null;
+
+            // Loop components.
+            for(int j=0; j < componentsArray.length(); j++){
+
+                // Get one result as JsonObject.
+                JSONObject oneComponent = componentsArray.getJSONObject(j);
+                if(oneComponent == null) return null;
+
+                // First get the types. We need to search for "locality" for city and "country" for country.
+                JSONArray typesArray = oneComponent.getJSONArray("types");
+
+                boolean isCity      = false;
+                boolean isCountry   = false;
+                for(int a=0;a<typesArray.length();a++){
+                    String oneType = typesArray.getString(a);
+                    if(oneType.equals("locality")) isCity = true;
+                    else if (oneType.equals("country")) isCountry = true;
+                }
+
+                if(isCity) cityString = oneComponent.getString("short_name");
+                if(isCountry) countryString = oneComponent.getString("short_name");
+
+            }
+
+
+        if(cityString.isEmpty() && countryString.isEmpty())
+            return "";
+        else
+            return cityString + "," + countryString;
+
     }
 
 }
