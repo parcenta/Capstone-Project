@@ -38,7 +38,7 @@ android {
 
             // Source: https://stackoverflow.com/questions/26124309/manage-google-maps-api-key-with-gradle-in-android-studio
             resValue "string", "google_maps_api_key", "[DEBUG_GOOGLE_API_KEY]"
-            resValue "string", "google_maps_api_key_for_webservice", "[DEBUG_GOOGLE_API_KEY]"
+            resValue "string", "google_maps_api_key_for_webservice", "[DEBUG_GOOGLE_API_KEY_FOR_WS]"
         }
     }
 
