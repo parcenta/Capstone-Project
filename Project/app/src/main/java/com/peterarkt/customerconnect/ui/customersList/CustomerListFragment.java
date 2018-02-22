@@ -109,7 +109,9 @@ public class CustomerListFragment extends Fragment implements LoaderManager.Load
         mTextToSearch = textToSearch;
         Bundle searchBundle = new Bundle();
         searchBundle.putString(TEXT_TO_SEARCH,textToSearch);
-        getLoaderManager().restartLoader(LOADER_CUSTOMER_SEARCH_ID, searchBundle,this);
+
+        // If Fragment is attached to the activity, then restart the search...
+        if(isAdded()) getLoaderManager().restartLoader(LOADER_CUSTOMER_SEARCH_ID, searchBundle,this);
     }
 
     // Called from parent activity.
@@ -241,21 +243,20 @@ public class CustomerListFragment extends Fragment implements LoaderManager.Load
                 // If cursor has results...
                 if(cursor.getCount() > 0){
 
-                    // Move to the first result...
-                    cursor.moveToFirst();
-
                     // Loop the results.
-                    do{
+                    while (cursor.moveToNext()){
                         // Get values from the Cursor
                         int customerId                  = cursor.getInt(cursor.getColumnIndex(CustomerContract.CustomerEntry._ID));
                         String customerName             = cursor.getString(cursor.getColumnIndex(CustomerContract.CustomerEntry.COLUMN_CUSTOMER_NAME));
                         String customerAddressStreet    = cursor.getString(cursor.getColumnIndex(CustomerContract.CustomerEntry.COLUMN_CUSTOMER_ADDRESS_STREET));
                         String customerPhotoUrl         = cursor.getString(cursor.getColumnIndex(CustomerContract.CustomerEntry.COLUMN_CUSTOMER_PHOTO_PATH));
 
+                        Timber.i("Loading CustomerName: " + customerName + " - Path: " + customerPhotoUrl);
+
                         // Add to the list.
                         itemList.add(new CustomerItem(customerId,customerName,customerAddressStreet,customerPhotoUrl));
 
-                    }while (cursor.moveToNext());
+                    };
                 }
 
                 // Close the cursor.

@@ -65,6 +65,12 @@ public class CustomerListAdapter extends RecyclerView.Adapter<CustomerListAdapte
                     .centerCrop()
                     .error(R.drawable.ic_material_person_gray)
                     .into(holder.mBinding.itemCustomerImage);
+        }else {
+            Picasso.with(mContext)
+                    .load(R.drawable.ic_material_person_gray)
+                    .fit()
+                    .centerCrop()
+                    .into(holder.mBinding.itemCustomerImage);
         }
     }
 
