@@ -9,6 +9,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.view.View;
 import android.widget.Toast;
 
 import com.peterarkt.customerconnect.R;
@@ -20,6 +21,8 @@ import com.peterarkt.customerconnect.ui.customerDetail.customerDetailInfo.Custom
 import com.peterarkt.customerconnect.ui.customerDetail.customerDetailVisits.CustomerVisitsFragment;
 import com.peterarkt.customerconnect.ui.customersList.CustomerListFragment;
 import com.peterarkt.customerconnect.ui.widget.WidgetIntentService;
+
+import timber.log.Timber;
 
 public class CustomerConnectMainActivity extends AppCompatActivity implements CustomerConnectMainActivityHandler{
 
@@ -36,22 +39,50 @@ public class CustomerConnectMainActivity extends AppCompatActivity implements Cu
 
         // Set toolbar
         setSupportActionBar(mBinding.toolbar);
+
+
+        // ----------------------------------------------------------------------------
+        // FOR TABLETS: Check if we are already showing a selected customer fragments.
+        // ----------------------------------------------------------------------------
+        boolean hasCustomerDetailFragmentsContainer = findViewById(R.id.customer_detail_container) != null;
+        if(savedInstanceState != null && hasCustomerDetailFragmentsContainer){
+            FragmentManager fm = getSupportFragmentManager();
+            Fragment customerDetailHeaderFragment   = fm.findFragmentByTag("customerHeaderFragment");
+
+            // If there are customer detail´s fragments being shown, then show the customer detail fragment container.
+            if(customerDetailHeaderFragment != null){
+                Timber.d("No detail being shown...");
+                mBinding.noSelectedCustomerContainer.setVisibility(View.GONE);
+                mBinding.selectedCustomerDetailContainer.setVisibility(View.VISIBLE);
+            }else // If not, then show the user a message indicating to select a customer.
+            {
+                Timber.d("No detail being shown...");
+                mBinding.selectedCustomerDetailContainer.setVisibility(View.GONE);
+                mBinding.noSelectedCustomerContainer.setVisibility(View.VISIBLE);
+            }
+        }
     }
 
     @Override
     public void showCustomerSelected(int customerId) {
 
         // Detect if fragment containers are present (is equivalent to ask if it is a tablet).
-        boolean hasFragmentContainer = findViewById(R.id.customer_detail_container) != null;
+        boolean hasCustomerDetailFragmentsContainer = findViewById(R.id.customer_detail_container) != null;
 
         // If is Tablet (sw600dp)
-        if(hasFragmentContainer){
+        if(hasCustomerDetailFragmentsContainer){
             FragmentManager fm = getSupportFragmentManager();
 
             // Create the fragments for the Customer Detail.
             CustomerDetailHeaderFragment customerDetailHeaderFragment = CustomerDetailHeaderFragment.newInstance(customerId);
             CustomerDetailInfoFragment customerDetailInfoFragment = CustomerDetailInfoFragment.newInstance(customerId);
             CustomerVisitsFragment customerDetailVisitsFragment = CustomerVisitsFragment.newInstance(customerId);
+
+            // Hide No Customer Selected container.
+            mBinding.noSelectedCustomerContainer.setVisibility(View.GONE);
+
+            // Show Customer´ Fragment Container.
+            mBinding.noSelectedCustomerContainer.setVisibility(View.GONE);
 
             // Now replace them in their respective places.
             fm.beginTransaction().replace(R.id.customer_detail_header_fragment_holder, customerDetailHeaderFragment,"customerHeaderFragment")
@@ -63,7 +94,10 @@ public class CustomerConnectMainActivity extends AppCompatActivity implements Cu
     }
 
 
+
+    // -------------------------------------------------------------------
     // From where is called, it will be called only on Tablet Mode.
+    // -------------------------------------------------------------------
     @Override
     public void deleteCustomer(final int customerId) {
 
