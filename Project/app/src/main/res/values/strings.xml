@@ -75,6 +75,10 @@
     <!-- Widget -->
     <string name="widget_title">Today´s Visits</string>
 
+    <string name="info_tab_title">Details</string>
+    <string name="visits_tab_title">Visits</string>
+
+
     <!-- Address type -->
     <string name="home_type">Home</string>
     <string name="work_type">Work</string>

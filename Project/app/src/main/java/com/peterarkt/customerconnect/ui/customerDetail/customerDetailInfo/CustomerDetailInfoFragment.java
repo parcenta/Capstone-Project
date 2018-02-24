@@ -50,10 +50,6 @@ public class CustomerDetailInfoFragment extends Fragment  implements LoaderManag
     private GoogleMap mGoogleMap;
 
 
-    public CustomerDetailInfoFragment() {
-        // Required empty public constructor
-    }
-
     /* --------------------------------------
     * Instance Helpers
     * --------------------------------------*/

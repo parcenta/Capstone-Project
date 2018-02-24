@@ -58,10 +58,6 @@ public class CustomerListFragment extends Fragment implements LoaderManager.Load
 
     private String mTextToSearch = "";
 
-    // Empty Constructor
-    public CustomerListFragment(){
-    }
-
 
     @Nullable
     @Override

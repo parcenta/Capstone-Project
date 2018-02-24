@@ -1,9 +1,11 @@
 package com.peterarkt.customerconnect.ui.customerDetail;
 
+import android.content.Context;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 
+import com.peterarkt.customerconnect.R;
 import com.peterarkt.customerconnect.ui.customerDetail.customerDetailInfo.CustomerDetailInfoFragment;
 import com.peterarkt.customerconnect.ui.customerDetail.customerDetailVisits.CustomerVisitsFragment;
 
@@ -13,10 +15,17 @@ public class CustomerDetailPagerAdapter extends FragmentStatePagerAdapter{
     private int tabsCount;
     private int mCustomerId;
 
-    public CustomerDetailPagerAdapter(FragmentManager fragmentManager, int tabsCount, int customerId) {
+    private String infoTabTitle = "";
+    private String visitsTabTitle = "";
+
+
+    public CustomerDetailPagerAdapter(Context context,FragmentManager fragmentManager, int tabsCount, int customerId) {
         super(fragmentManager);
         this.tabsCount   = tabsCount;
         this.mCustomerId = customerId;
+
+        this.infoTabTitle   = context.getString(R.string.info_tab_title);
+        this.visitsTabTitle = context.getString(R.string.visits_tab_title);
     }
 
     // Returns total number of pages
@@ -42,10 +51,10 @@ public class CustomerDetailPagerAdapter extends FragmentStatePagerAdapter{
     @Override
     public CharSequence getPageTitle(int position) {
         switch (position) {
-            case 0: // Fragment # 0 - This will show FirstFragment
-                return "Details";
-            case 1: // Fragment # 0 - This will show FirstFragment different title
-                return "Visits";
+            case 0:
+                return infoTabTitle;
+            case 1:
+                return visitsTabTitle;
             default:
                 return null;
         }

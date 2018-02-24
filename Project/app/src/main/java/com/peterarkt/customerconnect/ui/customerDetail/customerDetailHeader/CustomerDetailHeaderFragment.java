@@ -49,11 +49,6 @@ public class CustomerDetailHeaderFragment extends Fragment implements LoaderMana
 
     CustomerConnectMainActivityHandler mParentActivityHandler;
 
-
-    public CustomerDetailHeaderFragment() {
-        // Required empty public constructor
-    }
-
     /* --------------------------------------
     * Instance Helpers
     * --------------------------------------*/

@@ -112,7 +112,7 @@ public class CustomerDetailActivity extends AppCompatActivity implements Custome
         mBinding.customerDetailTabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
 
         // Set the View pager
-        mPagerAdapter = new CustomerDetailPagerAdapter(getSupportFragmentManager(),mBinding.customerDetailTabLayout.getTabCount(),mCustomerId);
+        mPagerAdapter = new CustomerDetailPagerAdapter(this,getSupportFragmentManager(),mBinding.customerDetailTabLayout.getTabCount(),mCustomerId);
         mBinding.customerDetailViewPager.setAdapter(mPagerAdapter);
         mBinding.customerDetailViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(mBinding.customerDetailTabLayout));
         mBinding.customerDetailTabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
